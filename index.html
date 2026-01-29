@@ -1,121 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>W3Clone - Learn HTML Comprehensive</title>
-    <style>
-        :root { --w3-green: #04AA6D; --w3-dark: #282a35; --w3-light: #f1f1f1; }
-        * { box-sizing: border-box; }
-        body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+<meta charset="UTF-8">
+<title>W3Clone Ultimate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* Top Nav */
-        .topnav { background: white; padding: 10px 20px; display: flex; align-items: center; border-bottom: 1px solid #ddd; z-index: 10; }
-        .logo { color: var(--w3-green); font-size: 28px; font-weight: 900; text-decoration: none; margin-right: 20px; }
+<style>
+:root{
+--green:#04aa6d;
+--bg:#ffffff;
+--text:#000;
+--panel:#f1f1f1;
+}
+body.dark{
+--bg:#1d1f27;
+--text:#eee;
+--panel:#2b2e3b;
+}
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Segoe UI,Arial;
+background:var(--bg);
+color:var(--text);
+height:100vh;
+display:flex;
+flex-direction:column;
+}
 
-        /* Main Layout */
-        .container { display: flex; flex: 1; overflow: hidden; }
+/* Top */
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px 20px;
+border-bottom:1px solid #ccc;
+}
+.logo{font-size:28px;font-weight:900;color:var(--green)}
+.toggle{cursor:pointer}
 
-        /* Sidebar */
-        .sidebar { width: 200px; background: var(--w3-light); overflow-y: auto; border-right: 1px solid #ddd; }
-        .sidebar h4 { padding: 10px 15px; margin-bottom: 0; font-size: 14px; }
-        .sidebar a { display: block; padding: 6px 15px; text-decoration: none; color: black; font-size: 14px; }
-        .sidebar a:hover { background: #ccc; }
-        .sidebar a.active { background: var(--w3-green); color: white; }
+/* Layout */
+.wrap{flex:1;display:flex;overflow:hidden}
 
-        /* Content */
-        .main-content { flex: 1; padding: 30px 60px; overflow-y: auto; }
-        .code-block { background: #E7E9EB; padding: 20px; border-radius: 5px; margin: 20px 0; }
-        textarea { width: 100%; height: 180px; font-family: 'Courier New', monospace; font-size: 15px; margin-bottom: 10px; }
-        
-        /* Reference Table */
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        table, th, td { border: 1px solid #ddd; }
-        th, td { padding: 12px; text-align: left; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
+/* Sidebar */
+.side{
+width:260px;
+background:var(--panel);
+overflow:auto;
+padding-bottom:50px;
+}
+.side h4{margin:15px}
+.side a{
+display:block;
+padding:8px 15px;
+cursor:pointer;
+}
+.side a.active{background:var(--green);color:white}
 
-        .btn { background: var(--w3-green); color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; text-decoration: none; }
-        .btn:hover { background: #059862; }
-    </style>
+/* Content */
+.main{
+flex:1;
+padding:30px;
+overflow:auto;
+}
+h1{font-size:40px}
+
+/* Buttons */
+.btn{
+background:var(--green);
+color:white;
+border:none;
+padding:10px 20px;
+font-weight:bold;
+cursor:pointer;
+border-radius:4px;
+}
+
+/* Editor */
+.editor{
+background:#e7e9eb;
+padding:20px;
+margin:20px 0;
+border-left:5px solid var(--green);
+}
+textarea{
+width:100%;
+height:200px;
+font-family:monospace;
+font-size:15px;
+}
+iframe{
+width:100%;
+height:200px;
+border:1px solid #ccc;
+background:white;
+}
+
+/* Quiz */
+.quiz label{display:block;margin:8px 0}
+
+/* Progress */
+.progress{
+margin:10px 0;
+font-size:14px;
+}
+</style>
 </head>
-<body>
 
-<div class="topnav">
-    <a href="#" class="logo">W3Clone</a>
-    <span style="font-size: 14px; color: #555;">The World's Largest Web Developer Site (Clone)</span>
+<body>
+<div class="top">
+<div class="logo">W3Clone</div>
+<div>
+<button class="btn" onclick="toggleDark()">🌙 Dark</button>
+</div>
 </div>
 
-<div class="container">
-    <nav class="sidebar">
-        <h4>HTML Tutorial</h4>
-        <a href="javascript:void(0)" onclick="loadContent('home')" id="link-home" class="active">HTML Home</a>
-        <a href="javascript:void(0)" onclick="loadContent('intro')">HTML Introduction</a>
-        <a href="javascript:void(0)" onclick="loadContent('editors')">HTML Editors</a>
-        <a href="javascript:void(0)" onclick="loadContent('basic')">HTML Basic</a>
-        <a href="javascript:void(0)" onclick="loadContent('elements')">HTML Elements</a>
-        <br>
-        <h4>HTML Forms</h4>
-        <a href="javascript:void(0)" onclick="loadContent('forms')">HTML Forms</a>
-        <a href="javascript:void(0)" onclick="loadContent('attributes')">Form Attributes</a>
-    </nav>
-
-    <main class="main-content" id="display-area">
-        </main>
+<div class="wrap">
+<div class="side" id="side"></div>
+<div class="main" id="main"></div>
 </div>
 
 <script>
-    const contentData = {
-        home: `
-            <h1>HTML Tutorial</h1>
-            <p>HTML is the standard markup language for Web pages. With HTML you can create your own Website.</p>
-            <div class="code-block">
-                <h3>Easy Learning with "Try it Yourself"</h3>
-                <textarea id="code-home"><!DOCTYPE html>
-<html>
-<body>
-<h1>My First Heading</h1>
-<p>My first paragraph.</p>
-</body>
-</html></textarea>
-                <button class="btn" onclick="runCode('home')">Try it Yourself »</button>
-                <div id="res-home" style="background:white; margin-top:10px; padding:10px; border:1px solid #ccc;"></div>
-            </div>`,
-        intro: `
-            <h1>HTML Introduction</h1>
-            <p>HTML stands for Hyper Text Markup Language. It describes the structure of a Web page.</p>
-            <ul>
-                <li>HTML consists of a series of elements</li>
-                <li>Elements tell the browser how to display the content</li>
-            </ul>
-            <hr>
-            <h3>A Simple HTML Document</h3>
-            <pre style="background:#f1f1f1; padding:10px;">&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n&lt;body&gt;\n&lt;h1&gt;Heading&lt;/h1&gt;\n&lt;/body&gt;\n&lt;/html&gt;</pre>`,
-        elements: `
-            <h1>HTML Elements</h1>
-            <p>An HTML element is defined by a start tag, some content, and an end tag:</p>
-            <table>
-                <tr><th>Start tag</th><th>Element content</th><th>End tag</th></tr>
-                <tr><td>&lt;h1&gt;</td><td>My First Heading</td><td>&lt;/h1&gt;</td></tr>
-                <tr><td>&lt;p&gt;</td><td>My first paragraph.</td><td>&lt;/p&gt;</td></tr>
-                <tr><td>&lt;br&gt;</td><td>none</td><td>none</td></tr>
-            </table>`
-    };
+/* ---------- DATA ---------- */
+const lessons = {
+HTML:[
+{ id:"html1", title:"HTML Intro", content:`
+<h1>HTML Introduction</h1>
+<p>HTML is the backbone of the web.</p>
+${sandbox(`<h1>Hello World</h1>`)}
+${quiz("html1")}
+`},
+],
+CSS:[
+{ id:"css1", title:"CSS Intro", content:`
+<h1>CSS Introduction</h1>
+<p>CSS styles HTML.</p>
+${sandbox(`<style>h1{color:red}</style><h1>Red</h1>`)}
+${quiz("css1")}
+`},
+],
+JS:[
+{ id:"js1", title:"JS Intro", content:`
+<h1>JavaScript Introduction</h1>
+<p>JS adds interactivity.</p>
+${sandbox(`<button onclick="alert('Hi')">Click</button>`)}
+${quiz("js1")}
+`},
+]
+};
 
-    function loadContent(page) {
-        document.getElementById('display-area').innerHTML = contentData[page] || "<h1>Content coming soon!</h1>";
-        // Update sidebar active state
-        document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-        event.target.classList.add('active');
-        if(page === 'home') runCode('home');
-    }
+/* ---------- UI BUILD ---------- */
+const side=document.getElementById("side");
+Object.keys(lessons).forEach(course=>{
+let h=document.createElement("h4");
+h.textContent=course;
+side.appendChild(h);
+lessons[course].forEach(l=>{
+let a=document.createElement("a");
+a.textContent=l.title;
+a.onclick=()=>loadLesson(course,l.id);
+a.id=l.id;
+side.appendChild(a);
+});
+});
 
-    function runCode(id) {
-        const code = document.getElementById('code-' + id).value;
-        document.getElementById('res-' + id).innerHTML = code;
-    }
+function loadLesson(course,id){
+const lesson=lessons[course].find(l=>l.id===id);
+document.getElementById("main").innerHTML=`
+<div class="progress">Progress: ${getProgress()}%</div>
+${lesson.content}
+`;
+document.querySelectorAll(".side a").forEach(a=>a.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+saveProgress(id);
+}
 
-    // Initial load
-    window.onload = () => loadContent('home');
+/* ---------- SANDBOX ---------- */
+function sandbox(code){
+return `
+<div class="editor">
+<textarea>${code}</textarea>
+<button class="btn" onclick="run(this)">Run</button>
+<iframe></iframe>
+</div>`;
+}
+function run(btn){
+const box=btn.previousElementSibling.value;
+btn.nextElementSibling.srcdoc=box;
+}
+
+/* ---------- QUIZ ---------- */
+function quiz(id){
+return `
+<div class="quiz">
+<h3>Quiz</h3>
+<label><input type="radio" name="${id}" value="1"> Correct</label>
+<label><input type="radio" name="${id}" value="0"> Wrong</label>
+<button class="btn" onclick="grade('${id}')">Submit</button>
+</div>`;
+}
+function grade(id){
+const v=document.querySelector(`input[name="${id}"]:checked`);
+alert(v && v.value==1?"Correct!":"Wrong!");
+}
+
+/* ---------- PROGRESS ---------- */
+function saveProgress(id){
+let done=JSON.parse(localStorage.getItem("done")||"[]");
+if(!done.includes(id)){done.push(id)}
+localStorage.setItem("done",JSON.stringify(done));
+}
+function getProgress(){
+let total=0,done=JSON.parse(localStorage.getItem("done")||"[]");
+Object.values(lessons).forEach(c=>total+=c.length);
+return Math.round(done.length/total*100);
+}
+
+/* ---------- DARK MODE ---------- */
+function toggleDark(){
+document.body.classList.toggle("dark");
+localStorage.setItem("dark",document.body.classList.contains("dark"));
+}
+if(localStorage.getItem("dark")==="true")document.body.classList.add("dark");
+
+/* ---------- START ---------- */
+loadLesson("HTML","html1");
 </script>
 </body>
 </html>
