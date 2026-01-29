@@ -2,229 +2,196 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>W3Clone Ultimate</title>
+<title>W3Clone AI MEGA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- PWA MANIFEST -->
+<link rel="manifest" href="data:application/json,{
+  &quot;name&quot;:&quot;W3Clone AI MEGA&quot;,
+  &quot;short_name&quot;:&quot;W3Clone&quot;,
+  &quot;display&quot;:&quot;standalone&quot;
+}">
+
+<!-- Transformers.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.8.0/dist/transformers.min.js"></script>
+
 <style>
-:root{
---green:#04aa6d;
---bg:#ffffff;
---text:#000;
---panel:#f1f1f1;
-}
-body.dark{
---bg:#1d1f27;
---text:#eee;
---panel:#2b2e3b;
-}
+:root{--g:#04aa6d;--bg:#fff;--tx:#000;--p:#f1f1f1}
+body.dark{--bg:#1d1f27;--tx:#eee;--p:#2b2e3b}
 *{box-sizing:border-box}
-body{
-margin:0;
-font-family:Segoe UI,Arial;
-background:var(--bg);
-color:var(--text);
-height:100vh;
-display:flex;
-flex-direction:column;
-}
-
-/* Top */
-.top{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:10px 20px;
-border-bottom:1px solid #ccc;
-}
-.logo{font-size:28px;font-weight:900;color:var(--green)}
-.toggle{cursor:pointer}
-
-/* Layout */
+body{margin:0;font-family:Segoe UI;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid #ccc}
+.logo{font-size:28px;font-weight:900;color:var(--g)}
 .wrap{flex:1;display:flex;overflow:hidden}
-
-/* Sidebar */
-.side{
-width:260px;
-background:var(--panel);
-overflow:auto;
-padding-bottom:50px;
-}
+.side{width:320px;background:var(--p);overflow:auto}
 .side h4{margin:15px}
-.side a{
-display:block;
-padding:8px 15px;
-cursor:pointer;
-}
-.side a.active{background:var(--green);color:white}
-
-/* Content */
-.main{
-flex:1;
-padding:30px;
-overflow:auto;
-}
-h1{font-size:40px}
-
-/* Buttons */
-.btn{
-background:var(--green);
-color:white;
-border:none;
-padding:10px 20px;
-font-weight:bold;
-cursor:pointer;
-border-radius:4px;
-}
-
-/* Editor */
-.editor{
-background:#e7e9eb;
-padding:20px;
-margin:20px 0;
-border-left:5px solid var(--green);
-}
-textarea{
-width:100%;
-height:200px;
-font-family:monospace;
-font-size:15px;
-}
-iframe{
-width:100%;
-height:200px;
-border:1px solid #ccc;
-background:white;
-}
-
-/* Quiz */
-.quiz label{display:block;margin:8px 0}
-
-/* Progress */
-.progress{
-margin:10px 0;
-font-size:14px;
-}
+.side a{display:block;padding:8px 15px;cursor:pointer}
+.side a.active{background:var(--g);color:white}
+.main{flex:1;padding:25px;overflow:auto;max-width:1100px}
+.btn{background:var(--g);color:white;border:none;padding:8px 14px;font-weight:bold;cursor:pointer}
+.editor{background:#e7e9eb;padding:15px;border-left:5px solid var(--g);margin:15px 0}
+textarea{width:100%;height:150px;font-family:monospace}
+iframe{width:100%;height:200px;border:1px solid #ccc}
+.ai{background:var(--p);padding:15px;margin:15px 0;border-radius:6px}
+.search{width:100%;padding:8px;margin:10px}
+.progress{font-size:14px;margin-bottom:10px}
 </style>
 </head>
 
 <body>
 <div class="top">
-<div class="logo">W3Clone</div>
+<div class="logo">W3Clone AI MEGA</div>
 <div>
-<button class="btn" onclick="toggleDark()">🌙 Dark</button>
+<button class="btn" onclick="toggleDark()">🌙</button>
+<button class="btn" onclick="startVoice()">🎤</button>
 </div>
 </div>
 
 <div class="wrap">
-<div class="side" id="side"></div>
+<div class="side">
+<input class="search" placeholder="Search lessons..." oninput="search(this.value)">
+<div id="sidebar"></div>
+<a onclick="certificate()">🎓 Certificate</a>
+</div>
 <div class="main" id="main"></div>
 </div>
 
 <script>
-/* ---------- DATA ---------- */
-const lessons = {
-HTML:[
-{ id:"html1", title:"HTML Intro", content:`
-<h1>HTML Introduction</h1>
-<p>HTML is the backbone of the web.</p>
-${sandbox(`<h1>Hello World</h1>`)}
-${quiz("html1")}
-`},
-],
-CSS:[
-{ id:"css1", title:"CSS Intro", content:`
-<h1>CSS Introduction</h1>
-<p>CSS styles HTML.</p>
-${sandbox(`<style>h1{color:red}</style><h1>Red</h1>`)}
-${quiz("css1")}
-`},
-],
-JS:[
-{ id:"js1", title:"JS Intro", content:`
-<h1>JavaScript Introduction</h1>
-<p>JS adds interactivity.</p>
-${sandbox(`<button onclick="alert('Hi')">Click</button>`)}
-${quiz("js1")}
-`},
-]
+/* ---------- AI ---------- */
+let ai;
+(async()=>{
+ai=await transformers.pipeline("text-generation","Xenova/distilgpt2");
+})();
+
+/* ---------- COURSE DATA (50+ LESSONS) ---------- */
+const courses={
+HTML:{count:20,desc:"Structure & markup"},
+CSS:{count:15,desc:"Styling & layout"},
+JavaScript:{count:15,desc:"Logic & interactivity"}
 };
 
-/* ---------- UI BUILD ---------- */
-const side=document.getElementById("side");
-Object.keys(lessons).forEach(course=>{
-let h=document.createElement("h4");
-h.textContent=course;
-side.appendChild(h);
-lessons[course].forEach(l=>{
-let a=document.createElement("a");
-a.textContent=l.title;
-a.onclick=()=>loadLesson(course,l.id);
-a.id=l.id;
-side.appendChild(a);
-});
+/* ---------- BUILD SIDEBAR ---------- */
+const sb=document.getElementById("sidebar");
+let totalLessons=0;
+Object.entries(courses).forEach(([name,c])=>{
+const h=document.createElement("h4");
+h.textContent=name;
+sb.appendChild(h);
+for(let i=1;i<=c.count;i++){
+totalLessons++;
+const a=document.createElement("a");
+a.textContent=`${name} Lesson ${i}`;
+a.onclick=()=>load(name,i);
+a.id=`${name}${i}`;
+sb.appendChild(a);
+}
 });
 
-function loadLesson(course,id){
-const lesson=lessons[course].find(l=>l.id===id);
-document.getElementById("main").innerHTML=`
-<div class="progress">Progress: ${getProgress()}%</div>
-${lesson.content}
-`;
+/* ---------- LOAD LESSON ---------- */
+function load(course,n){
 document.querySelectorAll(".side a").forEach(a=>a.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-saveProgress(id);
+document.getElementById(course+n).classList.add("active");
+
+main.innerHTML=`
+<div class="progress">Progress: ${progress()}%</div>
+<h1>${course} Lesson ${n}</h1>
+<p>${course} concept ${n}: ${courses[course].desc}.</p>
+
+<div class="editor">
+<textarea>${example(course,n)}</textarea>
+<button class="btn" onclick="run(this)">Run</button>
+<iframe></iframe>
+</div>
+
+<div class="ai">
+<button class="btn" onclick="explain('${course} ${n}')">🤖 Explain</button>
+<button class="btn" onclick="quiz('${course} ${n}')">🧠 Quiz</button>
+<div id="aiout"></div>
+</div>
+`;
+save(course+n);
+}
+
+/* ---------- EXAMPLES ---------- */
+function example(c,n){
+if(c==="HTML") return `<h1>HTML ${n}</h1><p>Paragraph</p>`;
+if(c==="CSS") return `<style>h1{color:hsl(${n*15},70%,50%)}</style><h1>CSS ${n}</h1>`;
+return `<button onclick="alert('JS ${n}')">Click</button>`;
 }
 
 /* ---------- SANDBOX ---------- */
-function sandbox(code){
-return `
-<div class="editor">
-<textarea>${code}</textarea>
-<button class="btn" onclick="run(this)">Run</button>
-<iframe></iframe>
-</div>`;
+function run(b){b.nextElementSibling.srcdoc=b.previousElementSibling.value}
+
+/* ---------- AI FUNCTIONS ---------- */
+async function explain(t){
+aiout.textContent="Thinking...";
+const r=await ai(`Explain ${t} simply`,{max_new_tokens:80});
+aiout.textContent=r[0].generated_text;
+speechSynthesis.speak(new SpeechSynthesisUtterance(aiout.textContent));
 }
-function run(btn){
-const box=btn.previousElementSibling.value;
-btn.nextElementSibling.srcdoc=box;
+async function quiz(t){
+aiout.textContent="Generating quiz...";
+const r=await ai(`Create a quiz question about ${t}`,{max_new_tokens:60});
+aiout.textContent=r[0].generated_text;
 }
 
-/* ---------- QUIZ ---------- */
-function quiz(id){
-return `
-<div class="quiz">
-<h3>Quiz</h3>
-<label><input type="radio" name="${id}" value="1"> Correct</label>
-<label><input type="radio" name="${id}" value="0"> Wrong</label>
-<button class="btn" onclick="grade('${id}')">Submit</button>
-</div>`;
+/* ---------- VOICE ---------- */
+function startVoice(){
+const r=new webkitSpeechRecognition();
+r.onresult=e=>explain(e.results[0][0].transcript);
+r.start();
 }
-function grade(id){
-const v=document.querySelector(`input[name="${id}"]:checked`);
-alert(v && v.value==1?"Correct!":"Wrong!");
+
+/* ---------- SEARCH ---------- */
+function search(q){
+document.querySelectorAll(".side a").forEach(a=>{
+a.style.display=a.textContent.toLowerCase().includes(q.toLowerCase())?"block":"none";
+});
 }
 
 /* ---------- PROGRESS ---------- */
-function saveProgress(id){
-let done=JSON.parse(localStorage.getItem("done")||"[]");
-if(!done.includes(id)){done.push(id)}
-localStorage.setItem("done",JSON.stringify(done));
+function save(id){
+let d=JSON.parse(localStorage.done||"[]");
+if(!d.includes(id))d.push(id);
+localStorage.done=JSON.stringify(d);
 }
-function getProgress(){
-let total=0,done=JSON.parse(localStorage.getItem("done")||"[]");
-Object.values(lessons).forEach(c=>total+=c.length);
-return Math.round(done.length/total*100);
+function progress(){
+let d=JSON.parse(localStorage.done||"[]");
+return Math.round(d.length/totalLessons*100);
 }
 
-/* ---------- DARK MODE ---------- */
+/* ---------- CERTIFICATE ---------- */
+function certificate(){
+const name=prompt("Your name?");
+const c=document.createElement("canvas");
+c.width=800;c.height=400;
+const x=c.getContext("2d");
+x.fillStyle="#fff";x.fillRect(0,0,800,400);
+x.fillStyle="#000";x.font="36px serif";
+x.fillText("Certificate of Completion",170,140);
+x.font="22px serif";
+x.fillText(name,350,220);
+x.fillText(new Date().toDateString(),300,280);
+const a=document.createElement("a");
+a.href=c.toDataURL();a.download="certificate.png";a.click();
+}
+
+/* ---------- DARK ---------- */
 function toggleDark(){
 document.body.classList.toggle("dark");
-localStorage.setItem("dark",document.body.classList.contains("dark"));
 }
-if(localStorage.getItem("dark")==="true")document.body.classList.add("dark");
+
+/* ---------- PWA ---------- */
+if('serviceWorker'in navigator){
+navigator.serviceWorker.register(URL.createObjectURL(new Blob([`
+self.addEventListener('fetch',e=>e.respondWith(
+caches.open('v1').then(c=>c.match(e.request)||fetch(e.request).then(r=>{c.put(e.request,r.clone());return r}))
+));
+`],{type:'text/javascript'})));
+}
 
 /* ---------- START ---------- */
-loadLesson("HTML","html1");
+load("HTML",1);
 </script>
 </body>
 </html>
