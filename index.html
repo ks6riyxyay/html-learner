@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>W3Clone LMS - WORKING</title>
+<title>W3Clone</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
@@ -41,13 +41,30 @@ input{padding:6px;width:100%;margin:5px 0}
   <main id="main"></main>
 </div>
 
-<script>
-/* ---------- AUTH ---------- */
-function sha256(str) {
+<!-- TRANSFORMERS JS -->
+<script type="module">
+import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@latest/dist/transformers.esm.js";
+
+let generator = null;
+
+// Load model once (takes time)
+async function loadAI() {
+  if (generator) return generator;
+  generator = await pipeline("text-generation", "Xenova/distilgpt2");
+  return generator;
+}
+
+async function aiGenerate(prompt) {
+  const model = await loadAI();
+  const output = await model(prompt, { max_new_tokens: 120 });
+  return output[0].generated_text;
+}
+
+// ---------------- AUTH ----------------
+async function sha256(str) {
   const buffer = new TextEncoder("utf-8").encode(str);
-  return crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-  });
+  const hash = await crypto.subtle.digest("SHA-256", buffer);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function authScreen(){
@@ -96,61 +113,59 @@ function logout(){
 
 /* ---------- USER + DATA ---------- */
 let user, data;
-
 const lessons = [
-  {id:"l1", title:"HTML 1 - What is HTML?", content:"HTML stands for HyperText Markup Language. It defines the structure of web pages using tags.", example:"<h1>Hello</h1><p>This is HTML</p>"},
-  {id:"l2", title:"HTML 2 - Elements & Tags", content:"HTML elements consist of opening tag, content, and closing tag.", example:"<h1>Tag</h1><p>Content</p>"},
-  {id:"l3", title:"HTML 3 - Headings", content:"Headings range from <h1> to <h6>.", example:"<h1>H1</h1><h2>H2</h2>"},
-  {id:"l4", title:"HTML 4 - Paragraphs", content:"Paragraphs use <p> tags.", example:"<p>This is a paragraph.</p>"},
-  {id:"l5", title:"HTML 5 - Links", content:"Links use <a href='url'>text</a>.", example:"<a href='https://example.com'>Example</a>"},
-  {id:"l6", title:"HTML 6 - Images", content:"Images use <img src='url' alt='text'>", example:"<img src='https://via.placeholder.com/150' alt='img'>"},
-  {id:"l7", title:"HTML 7 - Lists", content:"Ordered <ol> and unordered <ul> lists.", example:"<ul><li>Item</li></ul>"},
-  {id:"l8", title:"HTML 8 - Tables", content:"Tables use <table>, <tr>, <td>, <th>.", example:"<table><tr><th>H</th></tr><tr><td>1</td></tr></table>"},
-  {id:"l9", title:"HTML 9 - Forms", content:"Forms collect user input.", example:"<form><input placeholder='name'></form>"},
-  {id:"l10", title:"HTML 10 - Semantic HTML", content:"Use <header>, <footer>, <nav>, <section> for structure.", example:"<header>Header</header><footer>Footer</footer>"},
-  {id:"l11", title:"HTML 11 - Media", content:"Embed video/audio with <video> and <audio>.", example:"<video controls src=''></video>"},
-  {id:"l12", title:"HTML 12 - Meta Tags", content:"Meta tags define page info like charset and viewport.", example:"<meta charset='UTF-8'><meta name='viewport' content='width=device-width'>"},
-  {id:"l13", title:"HTML 13 - Iframes", content:"Iframes embed other pages.", example:"<iframe src='https://example.com'></iframe>"},
-  {id:"l14", title:"HTML 14 - Accessibility", content:"Use alt, aria-label, semantic tags for accessibility.", example:"<img alt='desc'>"},
-  {id:"l15", title:"HTML 15 - Best Practices", content:"Use semantic HTML, validate your code, and keep it clean.", example:"<h1>Best</h1>"},
-  {id:"l16", title:"CSS 1 - What is CSS?", content:"CSS styles HTML elements.", example:"<style>p{color:red}</style><p>Red</p>"},
-  {id:"l17", title:"CSS 2 - Selectors", content:"Select elements using tags, classes, and IDs.", example:"<style>.x{color:blue}</style><p class='x'>Blue</p>"},
-  {id:"l18", title:"CSS 3 - Box Model", content:"Content + padding + border + margin.", example:"<style>div{padding:10px;border:1px solid}</style><div>Box</div>"},
-  {id:"l19", title:"CSS 4 - Flexbox", content:"Flexbox aligns items in a container.", example:"<style>.f{display:flex}</style><div class='f'><div>A</div><div>B</div></div>"},
-  {id:"l20", title:"CSS 5 - Grid", content:"Grid creates rows and columns.", example:"<style>.g{display:grid;grid-template-columns:1fr 1fr}</style><div class='g'><div>A</div><div>B</div></div>"},
-  {id:"l21", title:"CSS 6 - Responsive", content:"Use media queries for mobile layouts.", example:"<style>@media(max-width:500px){p{color:red}}</style><p>Resize</p>"},
-  {id:"l22", title:"CSS 7 - Colors", content:"Use hex, rgb, hsl.", example:"<style>p{color:#04aa6d}</style><p>Green</p>"},
-  {id:"l23", title:"CSS 8 - Typography", content:"Use font-family, size, weight.", example:"<style>p{font-size:24px}</style><p>Big</p>"},
-  {id:"l24", title:"CSS 9 - Animations", content:"Animate using keyframes.", example:"<style>@keyframes x{0%{opacity:0}100%{opacity:1}}p{animation:x 2s}</style><p>Fade</p>"},
-  {id:"l25", title:"CSS 10 - Variables", content:"Use CSS variables with --name.", example:"<style>:root{--g:#04aa6d}p{color:var(--g)}</style><p>Var</p>"},
-  {id:"l26", title:"CSS 11 - Borders", content:"Use border-style, width, color.", example:"<style>div{border:2px solid red}</style><div>Border</div>"},
-  {id:"l27", title:"CSS 12 - Shadows", content:"Use box-shadow and text-shadow.", example:"<style>p{text-shadow:2px 2px #000}</style><p>Shadow</p>"},
-  {id:"l28", title:"CSS 13 - Transitions", content:"Use transition for smooth effects.", example:"<style>p{transition:1s}p:hover{color:red}</style><p>Hover</p>"},
-  {id:"l29", title:"CSS 14 - Position", content:"Use static, relative, absolute, fixed.", example:"<style>div{position:relative}span{position:absolute;top:0}</style><div><span>Abs</span></div>"},
-  {id:"l30", title:"CSS 15 - Layouts", content:"Learn layout with flex/grid/float.", example:"<style>.f{display:flex}</style><div class='f'><div>A</div><div>B</div></div>"},
-  {id:"l31", title:"JS 1 - What is JS?", content:"JS makes web pages interactive.", example:"<script>alert('Hello')</script>"},
-  {id:"l32", title:"JS 2 - Variables", content:"Use let/const to store values.", example:"<script>let x=5;console.log(x)</script>"},
-  {id:"l33", title:"JS 3 - Data Types", content:"String, Number, Boolean, Object, Array.", example:"<script>console.log(typeof 5)</script>"},
-  {id:"l34", title:"JS 4 - Operators", content:"+ - * / %", example:"<script>console.log(5+5)</script>"},
-  {id:"l35", title:"JS 5 - Conditionals", content:"Use if/else for decisions.", example:"<script>if(true)alert('yes')</script>"},
-  {id:"l36", title:"JS 6 - Loops", content:"Use for/while to repeat.", example:"<script>for(let i=0;i<3;i++)console.log(i)</script>"},
-  {id:"l37", title:"JS 7 - Functions", content:"Reusable code blocks.", example:"<script>function add(a,b){return a+b}console.log(add(2,3))</script>"},
-  {id:"l38", title:"JS 8 - DOM", content:"Document Object Model controls HTML.", example:"<button onclick='document.getElementById(\"p\").textContent=\"Changed\"'>Click</button><p id='p'>Original</p>"},
-  {id:"l39", title:"JS 9 - Events", content:"React to clicks, input, etc.", example:"<button onclick='alert(\"Clicked\")'>Click</button>"},
-  {id:"l40", title:"JS 10 - Arrays", content:"Store lists of values.", example:"<script>let a=[1,2,3];console.log(a[0])</script>"},
-  {id:"l41", title:"JS 11 - Objects", content:"Key/value pairs.", example:"<script>let o={name:'x'};console.log(o.name)</script>"},
-  {id:"l42", title:"JS 12 - JSON", content:"Data format used in APIs.", example:"<script>let j=JSON.stringify({a:1});console.log(j)</script>"},
-  {id:"l43", title:"JS 13 - Fetch API", content:"Use fetch to call APIs.", example:"<script>fetch('https://jsonplaceholder.typicode.com/todos/1').then(r=>r.json()).then(console.log)</script>"},
-  {id:"l44", title:"JS 14 - Async/Await", content:"Use async for clean async code.", example:"<script>async function f(){let r=await fetch('https://jsonplaceholder.typicode.com/todos/1');console.log(await r.json())}f()</script>"},
-  {id:"l45", title:"JS 15 - Best Practices", content:"Write clean code, comment, use functions.", example:"<script>console.log('Best Practice')</script>"},
-  {id:"l46", title:"JS 16 - LocalStorage", content:"Store data in browser using localStorage.", example:"<script>localStorage.setItem('x', '1'); alert(localStorage.getItem('x'))</script>"},
-  {id:"l47", title:"JS 17 - Form Validation", content:"Validate input before submit.", example:"<form onsubmit='return false'><input id='x'><button onclick='alert(document.getElementById(\"x\").value)'>Check</button></form>"},
-  {id:"l48", title:"JS 18 - DOM Manipulation", content:"Add/remove elements using JS.", example:"<button onclick='document.body.insertAdjacentHTML(\"beforeend\",\"<p>New</p>\")'>Add</button>"},
-  {id:"l49", title:"JS 19 - Error Handling", content:"Use try/catch to handle errors.", example:"<script>try{throw new Error('err')}catch(e){alert(e.message)}</script>"},
-  {id:"l50", title:"JS 20 - Modules (Intro)", content:"Use modules with import/export (requires server).", example:"<p>Modules need server</p>"}
+  {id:"l1", title:"HTML 1 - What is HTML?", content:"HTML is a markup language used to structure content on the web. It uses tags to define elements such as headings, paragraphs, links, images, and more.", example:"<h1>Welcome</h1><p>This is HTML.</p>"},
+  {id:"l2", title:"HTML 2 - Document Structure", content:"Every HTML document starts with <!DOCTYPE html> and includes <html>, <head>, and <body>. The head contains metadata, and the body contains visible content.", example:"<!DOCTYPE html><html><head><title>Title</title></head><body><h1>Hello</h1></body></html>"},
+  {id:"l3", title:"HTML 3 - Headings", content:"HTML headings range from <h1> to <h6>. Use one <h1> per page for SEO and structure.", example:"<h1>Main Title</h1><h2>Sub Title</h2>"},
+  {id:"l4", title:"HTML 4 - Paragraphs", content:"Paragraphs are created using <p>. Use them to separate blocks of text.", example:"<p>This is a paragraph.</p>"},
+  {id:"l5", title:"HTML 5 - Links", content:"Links use the <a> tag with href attribute. Use target=\"_blank\" to open in a new tab.", example:"<a href='https://example.com' target='_blank'>Visit</a>"},
+  {id:"l6", title:"HTML 6 - Images", content:"Images are inserted with <img> using src and alt attributes. Always add alt for accessibility.", example:"<img src='https://via.placeholder.com/150' alt='Placeholder'>"},
+  {id:"l7", title:"HTML 7 - Lists", content:"Use <ul> for unordered lists and <ol> for ordered lists. Items are <li>.", example:"<ul><li>Item 1</li><li>Item 2</li></ul>"},
+  {id:"l8", title:"HTML 8 - Tables", content:"Tables use <table>, <tr>, <th>, and <td>. Use <thead> and <tbody> for structure.", example:"<table><tr><th>Name</th><th>Age</th></tr><tr><td>John</td><td>30</td></tr></table>"},
+  {id:"l9", title:"HTML 9 - Forms", content:"Forms collect user input. Use <form>, <input>, <textarea>, <button>, and <select>.", example:"<form><input placeholder='Name'><button>Submit</button></form>"},
+  {id:"l10", title:"HTML 10 - Semantic HTML", content:"Semantic tags like <header>, <nav>, <main>, <section>, and <footer> improve accessibility and SEO.", example:"<header>Header</header><main>Main</main><footer>Footer</footer>"},
+  {id:"l11", title:"HTML 11 - Multimedia", content:"Use <audio> and <video> to embed media. Add controls attribute for play/pause.", example:"<video controls src='https://www.w3schools.com/html/mov_bbb.mp4'></video>"},
+  {id:"l12", title:"HTML 12 - Meta Tags", content:"Meta tags provide metadata like charset and viewport settings.", example:"<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"},
+  {id:"l13", title:"HTML 13 - Iframes", content:"Use <iframe> to embed another webpage inside your page.", example:"<iframe src='https://example.com'></iframe>"},
+  {id:"l14", title:"HTML 14 - Accessibility Basics", content:"Use alt text, labels, and semantic tags. Add aria-label for better screen reader support.", example:"<img alt='A cat'><button aria-label='Close'>X</button>"},
+  {id:"l15", title:"HTML 15 - HTML Best Practices", content:"Keep code clean, use proper indentation, validate HTML, and use semantic tags for structure.", example:"<h1>Clean HTML</h1><p>Use indentation.</p>"},
+  {id:"l16", title:"CSS 1 - What is CSS?", content:"CSS styles HTML elements. It controls layout, colors, fonts, and visual design.", example:"<style>p{color:red}</style><p>Red text</p>"},
+  {id:"l17", title:"CSS 2 - Selectors", content:"Selectors target HTML elements by tag, class, ID, or attribute. Example: .class, #id, tag.", example:"<style>.blue{color:blue}</style><p class='blue'>Blue</p>"},
+  {id:"l18", title:"CSS 3 - Box Model", content:"Every element is a box. Box model includes content, padding, border, and margin.", example:"<style>div{padding:10px;border:1px solid #000;margin:10px}</style><div>Box</div>"},
+  {id:"l19", title:"CSS 4 - Flexbox", content:"Flexbox creates flexible layouts. Use display:flex, justify-content, and align-items.", example:"<style>.f{display:flex;gap:10px}</style><div class='f'><div>A</div><div>B</div></div>"},
+  {id:"l20", title:"CSS 5 - Grid", content:"CSS Grid creates rows and columns. Use grid-template-columns and grid-gap.", example:"<style>.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}</style><div class='g'><div>A</div><div>B</div></div>"},
+  {id:"l21", title:"CSS 6 - Responsive Design", content:"Use media queries to change layout on different screen sizes.", example:"<style>@media(max-width:600px){p{color:red}}</style><p>Resize</p>"},
+  {id:"l22", title:"CSS 7 - Colors", content:"Use hex (#), RGB, and HSL colors. Example: #04aa6d or rgb(0,255,0).", example:"<style>p{color:#04aa6d}</style><p>Green</p>"},
+  {id:"l23", title:"CSS 8 - Typography", content:"Control font family, size, weight, and line-height.", example:"<style>p{font-size:24px;font-family:Arial}</style><p>Big text</p>"},
+  {id:"l24", title:"CSS 9 - Borders & Radius", content:"Use border properties and border-radius for rounded corners.", example:"<style>div{border:2px solid #000;border-radius:10px}</style><div>Rounded</div>"},
+  {id:"l25", title:"CSS 10 - Shadows", content:"Add depth with box-shadow and text-shadow.", example:"<style>p{text-shadow:2px 2px #000}</style><p>Shadow</p>"},
+  {id:"l26", title:"CSS 11 - Transitions", content:"Smooth changes using transition property.", example:"<style>p{transition:1s}p:hover{color:red}</style><p>Hover me</p>"},
+  {id:"l27", title:"CSS 12 - Animations", content:"Use keyframes for animations.", example:"<style>@keyframes fade{0%{opacity:0}100%{opacity:1}}p{animation:fade 2s}</style><p>Fade in</p>"},
+  {id:"l28", title:"CSS 13 - Variables", content:"Use CSS variables for reuse and theming.", example:"<style>:root{--g:#04aa6d}p{color:var(--g)}</style><p>Var color</p>"},
+  {id:"l29", title:"CSS 14 - Positioning", content:"Use static, relative, absolute, and fixed positioning.", example:"<style>.rel{position:relative} .abs{position:absolute;top:0;left:0}</style><div class='rel'><div class='abs'>Absolute</div></div>"},
+  {id:"l30", title:"CSS 15 - Layout Best Practices", content:"Use flex/grid for layout, avoid floats, and keep consistent spacing.", example:"<style>.layout{display:flex;gap:10px}</style><div class='layout'><div>A</div><div>B</div></div>"},
+  {id:"l31", title:"JS 1 - What is JavaScript?", content:"JavaScript is a programming language used to add interactivity to web pages.", example:"<script>alert('Hello JS')</script>"},
+  {id:"l32", title:"JS 2 - Variables", content:"Store values using let and const. Use var only when needed.", example:"<script>let x=5;const y=10;console.log(x+y)</script>"},
+  {id:"l33", title:"JS 3 - Data Types", content:"Types include string, number, boolean, object, array, null, undefined.", example:"<script>console.log(typeof 'text')</script>"},
+  {id:"l34", title:"JS 4 - Operators", content:"Use arithmetic, comparison, and logical operators.", example:"<script>console.log(5+3);console.log(5>3)</script>"},
+  {id:"l35", title:"JS 5 - Conditionals", content:"Use if/else and switch to make decisions.", example:"<script>let x=10;if(x>5)alert('Big')</script>"},
+  {id:"l36", title:"JS 6 - Loops", content:"Repeat code using for, while, and do-while loops.", example:"<script>for(let i=0;i<3;i++)console.log(i)</script>"},
+  {id:"l37", title:"JS 7 - Functions", content:"Functions reuse code and can return values.", example:"<script>function add(a,b){return a+b}console.log(add(2,3))</script>"},
+  {id:"l38", title:"JS 8 - Arrays", content:"Arrays store ordered lists of values.", example:"<script>let a=[1,2,3];console.log(a[0])</script>"},
+  {id:"l39", title:"JS 9 - Objects", content:"Objects store key/value pairs.", example:"<script>let obj={name:'Web'};console.log(obj.name)</script>"},
+  {id:"l40", title:"JS 10 - DOM Manipulation", content:"Use document methods to change HTML dynamically.", example:"<button onclick='document.getElementById(\"p\").textContent=\"Changed\"'>Click</button><p id='p'>Original</p>"},
+  {id:"l41", title:"JS 11 - Events", content:"React to user actions like clicks, inputs, and scroll.", example:"<button onclick='alert(\"Clicked\")'>Click</button>"},
+  {id:"l42", title:"JS 12 - JSON", content:"JSON is a data format used to exchange data between server and client.", example:"<script>let j=JSON.stringify({a:1});console.log(j)</script>"},
+  {id:"l43", title:"JS 13 - Fetch API", content:"Fetch allows you to request data from servers.", example:"<script>fetch('https://jsonplaceholder.typicode.com/todos/1').then(r=>r.json()).then(console.log)</script>"},
+  {id:"l44", title:"JS 14 - Async/Await", content:"Async/await makes asynchronous code easier to read.", example:"<script>async function f(){let r=await fetch('https://jsonplaceholder.typicode.com/todos/1');console.log(await r.json())}f()</script>"},
+  {id:"l45", title:"JS 15 - LocalStorage", content:"Store data locally in the browser with localStorage.", example:"<script>localStorage.setItem('x','1');alert(localStorage.getItem('x'))</script>"},
+  {id:"l46", title:"JS 16 - Form Validation", content:"Validate input before submitting forms.", example:"<form onsubmit='return false'><input id='x'><button onclick='alert(document.getElementById(\"x\").value)'>Check</button></form>"},
+  {id:"l47", title:"JS 17 - Error Handling", content:"Use try/catch to handle runtime errors.", example:"<script>try{throw new Error('Oops')}catch(e){console.log(e.message)}</script>"},
+  {id:"l48", title:"JS 18 - Functions Advanced", content:"Learn arrow functions and callbacks.", example:"<script>const add=(a,b)=>a+b;console.log(add(2,3))</script>"},
+  {id:"l49", title:"JS 19 - Modules (Intro)", content:"Modules allow you to split code into files using import/export (requires server).", example:"<p>Modules require a server environment.</p>"},
+  {id:"l50", title:"JS 20 - Final Project", content:"Build a simple webpage with HTML, CSS, and JS. Combine all learned concepts into one project.", example:"<h1>Project</h1><p>Create a small page combining HTML, CSS, and JS.</p>"}
 ];
 
-/* ---------- APP ---------- */
 function loadApp(){
   user=localStorage.getItem("session");
   if(!user) return authScreen();
@@ -199,8 +214,10 @@ function loadLesson(index){
     </div>
 
     <button class="btn" onclick="complete(${index})">✔ Complete Lesson</button>
+
     <div class="box">
-      <button class="btn" onclick="aiTutor('${l.title}')">🤖 AI Tutor</button>
+      <input id="aiq" placeholder="Ask AI about this lesson">
+      <button class="btn" onclick="askAI('${l.title}')">🤖 Ask AI</button>
       <div id="aiout"></div>
     </div>
   `;
@@ -219,19 +236,16 @@ function complete(index){
   }
 }
 
-/* ---------- AI TUTOR (offline) ---------- */
-function aiTutor(topic){
-  const answers = {
-    "HTML 1 - What is HTML?": "HTML is the structure of web pages. Think of it as the skeleton.",
-    "HTML 2 - Elements & Tags": "Elements are building blocks. Tags wrap content.",
-    "HTML 3 - Headings": "Use h1-h6 for titles. One h1 per page is best.",
-    "CSS 1 - What is CSS?": "CSS styles HTML. It controls color, layout, and design.",
-    "JS 1 - What is JS?": "JS makes pages interactive. It can change HTML dynamically."
-  };
-  document.getElementById("aiout").textContent = answers[topic] || "Ask a specific question about this lesson.";
+async function askAI(topic){
+  const question = document.getElementById("aiq").value;
+  if(!question) return alert("Ask a question");
+
+  document.getElementById("aiout").innerHTML = "Generating... (model downloads first time)";
+  const prompt = `You are a coding tutor. Topic: ${topic}\nQuestion: ${question}\nAnswer:`;
+  const answer = await aiGenerate(prompt);
+  document.getElementById("aiout").innerHTML = `<pre>${answer}</pre>`;
 }
 
-/* ---------- EXAM ---------- */
 const examQuestions = [
   {q:"HTML stands for?", a:"HyperText Markup Language"},
   {q:"CSS stands for?", a:"Cascading Style Sheets"},
@@ -255,7 +269,6 @@ function exam(){
   } else alert("Exam failed ❌");
 }
 
-/* ---------- CERTIFICATE ---------- */
 function certificate(){
   if(!data.exam || data.done.length<lessons.length){
     return alert("Complete all lessons + pass exam");
@@ -272,7 +285,6 @@ function certificate(){
   a.href=c.toDataURL(); a.download="certificate.png"; a.click();
 }
 
-/* ---------- LEADERBOARD ---------- */
 function leaderboard(){
   let arr=[];
   for(let k in localStorage){
@@ -285,21 +297,12 @@ function leaderboard(){
     arr.map(x=>`<p>${x.u}: ${x.score}/${lessons.length}</p>`).join("");
 }
 
-/* ---------- ADMIN ---------- */
 function adminPanel(){
   if(!data.admin) return alert("Access denied");
   const secret = prompt("Admin pass");
   if(secret !== "adminSecret") return alert("Wrong");
-  const action = prompt("Admin action: addlesson / reset");
-  if(action==="addlesson"){
-    const title=prompt("Lesson title");
-    const content=prompt("Lesson content");
-    const example=prompt("Lesson example");
-    lessons.push({id:"l"+lessons.length, title, content, example});
-    renderNav();
-    alert("Added");
-  }
-  if(action==="reset"){
+  const action = prompt("Admin action: resetProgress / addLesson");
+  if(action==="resetProgress"){
     data.done=[];
     data.exam=false;
     localStorage.setItem("user:"+user, JSON.stringify(data));
@@ -307,13 +310,19 @@ function adminPanel(){
     loadLesson(0);
     alert("Reset");
   }
+  if(action==="addLesson"){
+    const title=prompt("Lesson title");
+    const content=prompt("Lesson content");
+    const example=prompt("Lesson example");
+    lessons.push({id:"l"+lessons.length, title, content, example});
+    renderNav();
+    alert("Added");
+  }
 }
 
-/* ---------- DARK ---------- */
 function toggleDark(){document.body.classList.toggle("dark")}
-
-/* ---------- START ---------- */
 loadApp();
+
 </script>
 </body>
 </html>
