@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>W3Clone LMS - Admin Lock</title>
+<title>W3Clone LMS</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.8.0/dist/transformers.min.js"></script>
 
@@ -52,6 +52,7 @@ let ai;
 
 /* ---------- AUTH ---------- */
 let session = localStorage.session;
+
 if(!session) authScreen();
 else loadUser(session);
 
@@ -64,7 +65,7 @@ function authScreen(){
       <button class="btn" onclick="login()">Login</button>
       <button class="btn" onclick="register()">Register</button>
       <div class="box">
-        <small>Admin user is <b>YOU WONT KNOW!!!!</b></small>
+        <small>Admin user is <b>w232871287312897912731273</b></small>
       </div>
     </main>`;
 }
@@ -86,7 +87,7 @@ async function register(){
     done:[],
     scores:{},
     exam:false,
-    admin: u === "webwoner" // ONLY webwoner is admin
+    admin: u === "webwoner"
   });
   login();
 }
@@ -523,12 +524,8 @@ function resetAll(){
 }
 
 /* ---------- SAVE / LOAD ---------- */
-function save(){
-  localStorage[user]=JSON.stringify(data);
-}
-function saveCourses(){
-  localStorage.courses=JSON.stringify(courses);
-}
+function save(){ localStorage[user]=JSON.stringify(data) }
+function saveCourses(){ localStorage.courses=JSON.stringify(courses) }
 function loadCourses(){
   const stored=localStorage.courses;
   if(stored){
@@ -565,7 +562,7 @@ function voice(){
 function toggleDark(){document.body.classList.toggle("dark")}
 
 /* ---------- START ---------- */
-loadUser(localStorage.session);
+if(localStorage.session) loadUser(localStorage.session);
 </script>
 </body>
 </html>
