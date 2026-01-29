@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>W3Clone LMS - Admin for webwoner</title>
+<title>W3Clone LMS</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 :root{--g:#04aa6d;--bg:#fff;--tx:#000;--p:#f1f1f1}
@@ -111,35 +111,35 @@ const lessons = [
   {id:"l18", title:"CSS Lesson 8: Typography", content:"Font family, size, weight.", example:"<style>p{font-size:24px;font-family:Arial}</style><p>Text</p>"},
   {id:"l19", title:"CSS Lesson 9: Borders", content:"Borders and radius.", example:"<style>div{border:2px solid #000;border-radius:10px}</style><div>Rounded</div>"},
   {id:"l20", title:"CSS Lesson 10: Animation", content:"Use keyframes.", example:"<style>@keyframes fade{0%{opacity:0}100%{opacity:1}}p{animation:fade 2s}</style><p>Fade</p>"},
-  {id:"l21", title:"JS Lesson 1: What is JS?", content:"JS adds interactivity.", example:"<script>alert('Hello')</script>"},
-  {id:"l22", title:"JS Lesson 2: Variables", content:"Use let and const.", example:"<script>let x=5; const y=10; console.log(x+y);</script>"},
-  {id:"l23", title:"JS Lesson 3: Types", content:"String, number, boolean, object.", example:"<script>console.log(typeof 'text');</script>"},
-  {id:"l24", title:"JS Lesson 4: Operators", content:"Arithmetic and logic.", example:"<script>console.log(5+3);</script>"},
-  {id:"l25", title:"JS Lesson 5: Conditionals", content:"If/else statements.", example:"<script>if(5>3) alert('yes');</script>"},
-  {id:"l26", title:"JS Lesson 6: Loops", content:"For, while.", example:"<script>for(let i=0;i<3;i++) console.log(i);</script>"},
-  {id:"l27", title:"JS Lesson 7: Functions", content:"Reusable code.", example:"<script>function add(a,b){return a+b;} console.log(add(2,3));</script>"},
-  {id:"l28", title:"JS Lesson 8: Arrays", content:"Lists of values.", example:"<script>let a=[1,2,3]; console.log(a[0]);</script>"},
-  {id:"l29", title:"JS Lesson 9: Objects", content:"Key/value pairs.", example:"<script>let obj={name:'Web'}; console.log(obj.name);</script>"},
+  {id:"l21", title:"JS Lesson 1: What is JS?", content:"JS adds interactivity.", example:"<script>alert('Hello')<\/script>"},
+  {id:"l22", title:"JS Lesson 2: Variables", content:"Use let and const.", example:"<script>let x=5; const y=10; console.log(x+y);<\/script>"},
+  {id:"l23", title:"JS Lesson 3: Types", content:"String, number, boolean, object.", example:"<script>console.log(typeof 'text');<\/script>"},
+  {id:"l24", title:"JS Lesson 4: Operators", content:"Arithmetic and logic.", example:"<script>console.log(5+3);<\/script>"},
+  {id:"l25", title:"JS Lesson 5: Conditionals", content:"If/else statements.", example:"<script>if(5>3) alert('yes');<\/script>"},
+  {id:"l26", title:"JS Lesson 6: Loops", content:"For, while.", example:"<script>for(let i=0;i<3;i++) console.log(i);<\/script>"},
+  {id:"l27", title:"JS Lesson 7: Functions", content:"Reusable code.", example:"<script>function add(a,b){return a+b;} console.log(add(2,3));<\/script>"},
+  {id:"l28", title:"JS Lesson 8: Arrays", content:"Lists of values.", example:"<script>let a=[1,2,3]; console.log(a[0]);<\/script>"},
+  {id:"l29", title:"JS Lesson 9: Objects", content:"Key/value pairs.", example:"<script>let obj={name:'Web'}; console.log(obj.name);<\/script>"},
   {id:"l30", title:"JS Lesson 10: DOM", content:"Change HTML with JS.", example:"<button onclick='document.getElementById(\"p\").textContent=\"Changed\"'>Click</button><p id='p'>Original</p>"},
   {id:"l31", title:"JS Lesson 11: Events", content:"React to clicks.", example:"<button onclick='alert(\"Clicked\")'>Click</button>"},
-  {id:"l32", title:"JS Lesson 12: JSON", content:"Data format.", example:"<script>let j=JSON.stringify({a:1}); console.log(j);</script>"},
-  {id:"l33", title:"JS Lesson 13: Fetch", content:"Fetch API gets data.", example:"<script>fetch('https://jsonplaceholder.typicode.com/todos/1').then(r=>r.json()).then(console.log);</script>"},
-  {id:"l34", title:"JS Lesson 14: Async", content:"Async/Await.", example:"<script>async function f(){let r=await fetch('https://jsonplaceholder.typicode.com/todos/1'); console.log(await r.json());} f();</script>"},
-  {id:"l35", title:"JS Lesson 15: LocalStorage", content:"Store data locally.", example:"<script>localStorage.setItem('x','1'); alert(localStorage.getItem('x'));</script>"},
+  {id:"l32", title:"JS Lesson 12: JSON", content:"Data format.", example:"<script>let j=JSON.stringify({a:1}); console.log(j);<\/script>"},
+  {id:"l33", title:"JS Lesson 13: Fetch", content:"Fetch API gets data.", example:"<script>fetch('https://jsonplaceholder.typicode.com/todos/1').then(r=>r.json()).then(console.log);<\/script>"},
+  {id:"l34", title:"JS Lesson 14: Async", content:"Async/Await.", example:"<script>async function f(){let r=await fetch('https://jsonplaceholder.typicode.com/todos/1'); console.log(await r.json());} f();<\/script>"},
+  {id:"l35", title:"JS Lesson 15: LocalStorage", content:"Store data locally.", example:"<script>localStorage.setItem('x','1'); alert(localStorage.getItem('x'));<\/script>"},
   {id:"l36", title:"JS Lesson 16: Validation", content:"Validate forms.", example:"<form onsubmit='return false'><input id='x'><button onclick='alert(document.getElementById(\"x\").value)'>Check</button></form>"},
-  {id:"l37", title:"JS Lesson 17: Error Handling", content:"Try/catch.", example:"<script>try{throw new Error('Oops')}catch(e){console.log(e.message)}</script>"},
-  {id:"l38", title:"JS Lesson 18: Arrow Functions", content:"Short syntax.", example:"<script>const add=(a,b)=>a+b; console.log(add(2,3));</script>"},
+  {id:"l37", title:"JS Lesson 17: Error Handling", content:"Try/catch.", example:"<script>try{throw new Error('Oops')}catch(e){console.log(e.message)}<\/script>"},
+  {id:"l38", title:"JS Lesson 18: Arrow Functions", content:"Short syntax.", example:"<script>const add=(a,b)=>a+b; console.log(add(2,3));<\/script>"},
   {id:"l39", title:"JS Lesson 19: Modules", content:"Import/export.", example:"<p>Modules require server.</p>"},
   {id:"l40", title:"JS Lesson 20: Final Project", content:"Build a web page combining HTML/CSS/JS.", example:"<h1>Project</h1><p>Build a webpage using all skills.</p>"},
   {id:"l41", title:"CSS Bonus: Variables", content:"Use CSS variables.", example:"<style>:root{--g:#04aa6d}p{color:var(--g)}</style><p>Variable</p>"},
   {id:"l42", title:"CSS Bonus: Transitions", content:"Smooth hover effects.", example:"<style>p{transition:1s}p:hover{color:red}</style><p>Hover me</p>"},
   {id:"l43", title:"HTML Bonus: Meta", content:"Use meta tags for SEO.", example:"<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"},
   {id:"l44", title:"HTML Bonus: Accessibility", content:"Use labels & ARIA.", example:"<label for='name'>Name</label><input id='name' aria-label='Name'>"},
-  {id:"l45", title:"JS Bonus: Template Strings", content:"Use backticks for strings.", example:"<script>let n='Web'; console.log(`Hello ${n}`);</script>"},
-  {id:"l46", title:"JS Bonus: Destructuring", content:"Extract values easily.", example:"<script>const [a,b]=[1,2]; console.log(a,b);</script>"},
-  {id:"l47", title:"JS Bonus: Spread", content:"Use ... operator.", example:"<script>let a=[1,2]; let b=[...a,3]; console.log(b);</script>"},
-  {id:"l48", title:"JS Bonus: Map", content:"Transform arrays.", example:"<script>let a=[1,2]; console.log(a.map(x=>x*2));</script>"},
-  {id:"l49", title:"JS Bonus: Filter", content:"Filter arrays.", example:"<script>let a=[1,2,3]; console.log(a.filter(x=>x>1));</script>"},
+  {id:"l45", title:"JS Bonus: Template Strings", content:"Use backticks for strings.", example:"<script>let n='Web'; console.log(`Hello ${n}`);<\/script>"},
+  {id:"l46", title:"JS Bonus: Destructuring", content:"Extract values easily.", example:"<script>const [a,b]=[1,2]; console.log(a,b);<\/script>"},
+  {id:"l47", title:"JS Bonus: Spread", content:"Use ... operator.", example:"<script>let a=[1,2]; let b=[...a,3]; console.log(b);<\/script>"},
+  {id:"l48", title:"JS Bonus: Map", content:"Transform arrays.", example:"<script>let a=[1,2]; console.log(a.map(x=>x*2));<\/script>"},
+  {id:"l49", title:"JS Bonus: Filter", content:"Filter arrays.", example:"<script>let a=[1,2,3]; console.log(a.filter(x=>x>1));<\/script>"},
   {id:"l50", title:"Final Bonus: Deploy", content:"Deploy on Vercel by uploading this file.", example:"<p>Just deploy this folder on Vercel.</p>"}
 ];
 
