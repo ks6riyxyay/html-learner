@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>W3Clone LMS - Transformers AI (WORKING)</title>
+<title>W3Clone LMS - Admin for webwoner</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 :root{--g:#04aa6d;--bg:#fff;--tx:#000;--p:#f1f1f1}
@@ -40,26 +40,7 @@ input{padding:6px;width:100%;margin:5px 0}
   <main id="main"></main>
 </div>
 
-<!-- TRANSFORMERS UMD (No import) -->
-<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@latest/dist/transformers.min.js"></script>
-
 <script>
-/* ---------- TRANSFORMERS AI ---------- */
-let generator = null;
-
-async function loadAI(){
-  if(generator) return generator;
-  generator = await transformers.pipeline("text-generation", "Xenova/distilgpt2");
-  return generator;
-}
-
-async function aiGenerate(prompt){
-  const model = await loadAI();
-  const out = await model(prompt, { max_new_tokens: 120 });
-  return out[0].generated_text;
-}
-
-/* ---------- AUTH ---------- */
 async function sha256(str){
   const buffer = new TextEncoder("utf-8").encode(str);
   const hash = await crypto.subtle.digest("SHA-256", buffer);
@@ -109,25 +90,70 @@ function logout(){
 }
 
 /* ---------- LESSONS ---------- */
-let user, data;
-const lessons = [];
-for(let i=1;i<=50;i++){
-  lessons.push({
-    id:"l"+i,
-    title:"Lesson "+i+" - HTML/CSS/JS Topic",
-    content:"Real lesson content placeholder. Replace with real text if you want. This is a working system.",
-    example:`<h1>Lesson ${i}</h1><p>Example code for lesson ${i}</p>`
-  });
-}
+const lessons = [
+  {id:"l1", title:"HTML Lesson 1: What is HTML?", content:"HTML is the standard markup language for creating web pages.", example:"<!DOCTYPE html><html><head><title>HTML</title></head><body><h1>Hello HTML</h1></body></html>"},
+  {id:"l2", title:"HTML Lesson 2: HTML Structure", content:"HTML contains head and body.", example:"<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Page</title></head><body><p>Text</p></body></html>"},
+  {id:"l3", title:"HTML Lesson 3: Headings", content:"Use h1-h6 for headings.", example:"<h1>H1</h1><h2>H2</h2>"},
+  {id:"l4", title:"HTML Lesson 4: Paragraphs", content:"Use p for paragraphs.", example:"<p>This is a paragraph.</p>"},
+  {id:"l5", title:"HTML Lesson 5: Links", content:"Use a tag for links.", example:"<a href='https://example.com'>Example</a>"},
+  {id:"l6", title:"HTML Lesson 6: Images", content:"Use img with alt text.", example:"<img src='https://via.placeholder.com/150' alt='img'>"},
+  {id:"l7", title:"HTML Lesson 7: Lists", content:"Use ul/ol and li.", example:"<ul><li>One</li><li>Two</li></ul>"},
+  {id:"l8", title:"HTML Lesson 8: Tables", content:"Use table, tr, th, td.", example:"<table><tr><th>Name</th><th>Age</th></tr><tr><td>John</td><td>30</td></tr></table>"},
+  {id:"l9", title:"HTML Lesson 9: Forms", content:"Use form and inputs.", example:"<form><input placeholder='Name'><button>Submit</button></form>"},
+  {id:"l10", title:"HTML Lesson 10: Semantic Tags", content:"Use header, nav, main, footer.", example:"<header>Header</header><main>Main</main><footer>Footer</footer>"},
+  {id:"l11", title:"CSS Lesson 1: What is CSS?", content:"CSS styles HTML elements.", example:"<style>p{color:red}</style><p>Red</p>"},
+  {id:"l12", title:"CSS Lesson 2: Selectors", content:"Selectors target elements.", example:"<style>.blue{color:blue}</style><p class='blue'>Blue</p>"},
+  {id:"l13", title:"CSS Lesson 3: Box Model", content:"Content + padding + border + margin.", example:"<style>div{padding:10px;border:1px solid #000;margin:10px}</style><div>Box</div>"},
+  {id:"l14", title:"CSS Lesson 4: Flexbox", content:"Flexible layout system.", example:"<style>.f{display:flex;gap:10px}</style><div class='f'><div>A</div><div>B</div></div>"},
+  {id:"l15", title:"CSS Lesson 5: Grid", content:"Grid layout with columns.", example:"<style>.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}</style><div class='g'><div>A</div><div>B</div></div>"},
+  {id:"l16", title:"CSS Lesson 6: Responsive", content:"Use media queries.", example:"<style>@media(max-width:600px){p{color:red}}</style><p>Resize</p>"},
+  {id:"l17", title:"CSS Lesson 7: Colors", content:"Hex, RGB, HSL.", example:"<style>p{color:#04aa6d}</style><p>Green</p>"},
+  {id:"l18", title:"CSS Lesson 8: Typography", content:"Font family, size, weight.", example:"<style>p{font-size:24px;font-family:Arial}</style><p>Text</p>"},
+  {id:"l19", title:"CSS Lesson 9: Borders", content:"Borders and radius.", example:"<style>div{border:2px solid #000;border-radius:10px}</style><div>Rounded</div>"},
+  {id:"l20", title:"CSS Lesson 10: Animation", content:"Use keyframes.", example:"<style>@keyframes fade{0%{opacity:0}100%{opacity:1}}p{animation:fade 2s}</style><p>Fade</p>"},
+  {id:"l21", title:"JS Lesson 1: What is JS?", content:"JS adds interactivity.", example:"<script>alert('Hello')</script>"},
+  {id:"l22", title:"JS Lesson 2: Variables", content:"Use let and const.", example:"<script>let x=5; const y=10; console.log(x+y);</script>"},
+  {id:"l23", title:"JS Lesson 3: Types", content:"String, number, boolean, object.", example:"<script>console.log(typeof 'text');</script>"},
+  {id:"l24", title:"JS Lesson 4: Operators", content:"Arithmetic and logic.", example:"<script>console.log(5+3);</script>"},
+  {id:"l25", title:"JS Lesson 5: Conditionals", content:"If/else statements.", example:"<script>if(5>3) alert('yes');</script>"},
+  {id:"l26", title:"JS Lesson 6: Loops", content:"For, while.", example:"<script>for(let i=0;i<3;i++) console.log(i);</script>"},
+  {id:"l27", title:"JS Lesson 7: Functions", content:"Reusable code.", example:"<script>function add(a,b){return a+b;} console.log(add(2,3));</script>"},
+  {id:"l28", title:"JS Lesson 8: Arrays", content:"Lists of values.", example:"<script>let a=[1,2,3]; console.log(a[0]);</script>"},
+  {id:"l29", title:"JS Lesson 9: Objects", content:"Key/value pairs.", example:"<script>let obj={name:'Web'}; console.log(obj.name);</script>"},
+  {id:"l30", title:"JS Lesson 10: DOM", content:"Change HTML with JS.", example:"<button onclick='document.getElementById(\"p\").textContent=\"Changed\"'>Click</button><p id='p'>Original</p>"},
+  {id:"l31", title:"JS Lesson 11: Events", content:"React to clicks.", example:"<button onclick='alert(\"Clicked\")'>Click</button>"},
+  {id:"l32", title:"JS Lesson 12: JSON", content:"Data format.", example:"<script>let j=JSON.stringify({a:1}); console.log(j);</script>"},
+  {id:"l33", title:"JS Lesson 13: Fetch", content:"Fetch API gets data.", example:"<script>fetch('https://jsonplaceholder.typicode.com/todos/1').then(r=>r.json()).then(console.log);</script>"},
+  {id:"l34", title:"JS Lesson 14: Async", content:"Async/Await.", example:"<script>async function f(){let r=await fetch('https://jsonplaceholder.typicode.com/todos/1'); console.log(await r.json());} f();</script>"},
+  {id:"l35", title:"JS Lesson 15: LocalStorage", content:"Store data locally.", example:"<script>localStorage.setItem('x','1'); alert(localStorage.getItem('x'));</script>"},
+  {id:"l36", title:"JS Lesson 16: Validation", content:"Validate forms.", example:"<form onsubmit='return false'><input id='x'><button onclick='alert(document.getElementById(\"x\").value)'>Check</button></form>"},
+  {id:"l37", title:"JS Lesson 17: Error Handling", content:"Try/catch.", example:"<script>try{throw new Error('Oops')}catch(e){console.log(e.message)}</script>"},
+  {id:"l38", title:"JS Lesson 18: Arrow Functions", content:"Short syntax.", example:"<script>const add=(a,b)=>a+b; console.log(add(2,3));</script>"},
+  {id:"l39", title:"JS Lesson 19: Modules", content:"Import/export.", example:"<p>Modules require server.</p>"},
+  {id:"l40", title:"JS Lesson 20: Final Project", content:"Build a web page combining HTML/CSS/JS.", example:"<h1>Project</h1><p>Build a webpage using all skills.</p>"},
+  {id:"l41", title:"CSS Bonus: Variables", content:"Use CSS variables.", example:"<style>:root{--g:#04aa6d}p{color:var(--g)}</style><p>Variable</p>"},
+  {id:"l42", title:"CSS Bonus: Transitions", content:"Smooth hover effects.", example:"<style>p{transition:1s}p:hover{color:red}</style><p>Hover me</p>"},
+  {id:"l43", title:"HTML Bonus: Meta", content:"Use meta tags for SEO.", example:"<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"},
+  {id:"l44", title:"HTML Bonus: Accessibility", content:"Use labels & ARIA.", example:"<label for='name'>Name</label><input id='name' aria-label='Name'>"},
+  {id:"l45", title:"JS Bonus: Template Strings", content:"Use backticks for strings.", example:"<script>let n='Web'; console.log(`Hello ${n}`);</script>"},
+  {id:"l46", title:"JS Bonus: Destructuring", content:"Extract values easily.", example:"<script>const [a,b]=[1,2]; console.log(a,b);</script>"},
+  {id:"l47", title:"JS Bonus: Spread", content:"Use ... operator.", example:"<script>let a=[1,2]; let b=[...a,3]; console.log(b);</script>"},
+  {id:"l48", title:"JS Bonus: Map", content:"Transform arrays.", example:"<script>let a=[1,2]; console.log(a.map(x=>x*2));</script>"},
+  {id:"l49", title:"JS Bonus: Filter", content:"Filter arrays.", example:"<script>let a=[1,2,3]; console.log(a.filter(x=>x>1));</script>"},
+  {id:"l50", title:"Final Bonus: Deploy", content:"Deploy on Vercel by uploading this file.", example:"<p>Just deploy this folder on Vercel.</p>"}
+];
 
-/* ---------- APP ---------- */
+let user, data;
+
 function loadApp(){
   user=localStorage.getItem("session");
   if(!user) return authScreen();
   data=JSON.parse(localStorage.getItem("user:"+user));
   if(!data) return authScreen();
 
-  if(user==="webwoner") data.admin=true;
+  if(user === "webwoner") data.admin=true;  // Admin ONLY for webwoner
+  localStorage.setItem("user:"+user, JSON.stringify(data));
+
   renderNav();
   loadLesson(data.done.length);
 }
@@ -143,6 +169,7 @@ function renderNav(){
     a.id=l.id;
     nav.appendChild(a);
   });
+
   nav.innerHTML += `
     <a onclick="exam()">🧪 Final Exam</a>
     <a onclick="certificate()">🎓 Certificate</a>
@@ -169,12 +196,6 @@ function loadLesson(index){
     </div>
 
     <button class="btn" onclick="complete(${index})">✔ Complete Lesson</button>
-
-    <div class="box">
-      <input id="aiq" placeholder="Ask AI about this lesson">
-      <button class="btn" onclick="askAI('${l.title}')">🤖 Ask AI</button>
-      <div id="aiout"></div>
-    </div>
   `;
 }
 
@@ -191,16 +212,7 @@ function complete(index){
   }
 }
 
-async function askAI(topic){
-  const question=document.getElementById("aiq").value;
-  if(!question) return alert("Ask a question");
-  document.getElementById("aiout").innerHTML="Generating... (first time may take 20-40s)";
-  const prompt=`You are a coding tutor. Topic: ${topic}\nQuestion: ${question}\nAnswer:`;
-  const answer=await aiGenerate(prompt);
-  document.getElementById("aiout").innerHTML=`<pre>${answer}</pre>`;
-}
-
-/* ---------- EXAM ---------- */
+/* ---------- FINAL EXAM ---------- */
 const examQuestions = [
   {q:"HTML stands for?", a:"HyperText Markup Language"},
   {q:"CSS stands for?", a:"Cascading Style Sheets"},
@@ -246,16 +258,26 @@ function leaderboard(){
   document.getElementById("main").innerHTML="<h1>Leaderboard</h1>" + arr.map(x=>`<p>${x.u}: ${x.score}/${lessons.length}</p>`).join("");
 }
 
+/* ---------- ADMIN PANEL (ONLY webwoner) ---------- */
 function adminPanel(){
   if(!data.admin) return alert("Access denied");
-  const secret=prompt("Admin pass");
-  if(secret !== "adminSecret") return alert("Wrong");
-  const action=prompt("Admin action: resetProgress / addLesson");
+
+  const secret = prompt("Enter admin pass:");
+  if(secret !== "superSecret123") return alert("Wrong pass");
+
+  const action=prompt("Admin actions: resetProgress / addLesson / deleteUser / unlockAll");
   if(action==="resetProgress"){
     data.done=[]; data.exam=false;
     localStorage.setItem("user:"+user, JSON.stringify(data));
     renderNav(); loadLesson(0);
     alert("Reset");
+  }
+  if(action==="unlockAll"){
+    data.done = Array.from({length:lessons.length},(_,i)=>i);
+    data.exam=true;
+    localStorage.setItem("user:"+user, JSON.stringify(data));
+    renderNav(); loadLesson(lessons.length-1);
+    alert("Unlocked all");
   }
   if(action==="addLesson"){
     const title=prompt("Lesson title");
@@ -263,13 +285,19 @@ function adminPanel(){
     const example=prompt("Lesson example");
     lessons.push({id:"l"+lessons.length, title, content, example});
     renderNav();
-    alert("Added");
+    alert("Added lesson");
+  }
+  if(action==="deleteUser"){
+    const u=prompt("Username to delete");
+    if(u && localStorage.getItem("user:"+u)){
+      localStorage.removeItem("user:"+u);
+      alert("Deleted " + u);
+    } else alert("User not found");
   }
 }
 
 function toggleDark(){document.body.classList.toggle("dark")}
 loadApp();
 </script>
-
 </body>
 </html>
