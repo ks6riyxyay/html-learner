@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>W3Clone LMS</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W3Clone LMS (One File)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.8.0/dist/transformers.min.js"></script>
 
 <style>
@@ -14,7 +15,7 @@ body{margin:0;font-family:Segoe UI;background:var(--bg);color:var(--tx)}
 header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid #ccc}
 .logo{font-size:26px;font-weight:900;color:var(--g)}
 .wrap{display:flex;height:calc(100vh - 55px)}
-nav{width:340px;background:var(--p);overflow:auto}
+nav{width:320px;background:var(--p);overflow:auto}
 nav a{display:block;padding:8px 15px;cursor:pointer}
 nav a.locked{opacity:.4;pointer-events:none}
 nav a.active{background:var(--g);color:#fff}
@@ -24,25 +25,22 @@ main{flex:1;padding:25px;overflow:auto}
 textarea{width:100%;height:140px;font-family:monospace}
 iframe{width:100%;height:200px;border:1px solid #ccc}
 .box{background:var(--p);padding:12px;border-radius:6px;margin:12px 0}
-input, select{padding:6px;width:100%;margin:5px 0}
-small{color:#666}
+input{padding:6px;width:100%;margin:5px 0}
 </style>
 </head>
-
 <body>
 <header>
-  <div class="logo">W3Clone LMS</div>
-  <div>
-    <button class="btn" onclick="toggleDark()">🌙</button>
-    <button class="btn" onclick="voice()">🎤</button>
-    <button class="btn" onclick="openLeaderboard()">🏆 Leaderboard</button>
-    <button class="btn" onclick="logout()">Logout</button>
-  </div>
+<div class="logo">W3Clone LMS</div>
+<div>
+<button class="btn" onclick="toggleDark()">🌙</button>
+<button class="btn" onclick="voice()">🎤</button>
+<button class="btn" onclick="logout()">Logout</button>
+</div>
 </header>
 
 <div class="wrap">
-  <nav id="nav"></nav>
-  <main id="main"></main>
+<nav id="nav"></nav>
+<main id="main"></main>
 </div>
 
 <script>
@@ -51,10 +49,13 @@ let ai;
 (async()=>ai=await transformers.pipeline("text-generation","Xenova/distilgpt2"))();
 
 /* ---------- AUTH ---------- */
-let session = localStorage.session;
+const ADMIN_USERNAME_HASH="c0b0d0b1a1e0c7d0b1a0c7b0d0c0b0c7d0a0c7d0b0a0c7b0d0a0c7b0d0c7"; // placeholder
 
-if(!session) authScreen();
-else loadUser(session);
+async function hash(t){
+  const b=new TextEncoder().encode(t);
+  const h=await crypto.subtle.digest("SHA-256",b);
+  return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
 
 function authScreen(){
   document.body.innerHTML=`
@@ -64,16 +65,7 @@ function authScreen(){
       <input id="p" type="password" placeholder="Password">
       <button class="btn" onclick="login()">Login</button>
       <button class="btn" onclick="register()">Register</button>
-      <div class="box">
-        <small>Admin user is <b>w232871287312897912731273</b></small>
-      </div>
     </main>`;
-}
-
-async function hash(t){
-  const b=new TextEncoder().encode(t);
-  const h=await crypto.subtle.digest("SHA-256",b);
-  return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
 async function register(){
@@ -81,488 +73,235 @@ async function register(){
   const p=document.getElementById("p").value;
   if(!u||!p) return alert("Enter username + password");
   if(localStorage[u]) return alert("User exists");
+
   const pw=await hash(p);
-  localStorage[u]=JSON.stringify({
-    pw,
-    done:[],
-    scores:{},
-    exam:false,
-    admin: u === "webwoner"
-  });
+  localStorage[u]=JSON.stringify({pw,done:[],exam:false,score:0,admin:false});
   login();
 }
 
 async function login(){
   const u=document.getElementById("u").value.trim();
   const p=document.getElementById("p").value;
-  const user=JSON.parse(localStorage[u]||"null");
-  if(!user) return alert("User not found");
+  if(!u||!p) return alert("Enter username + password");
+  const userData=JSON.parse(localStorage[u]||"null");
+  if(!userData) return alert("User not found");
+
   const pw=await hash(p);
-  if(pw!==user.pw) return alert("Wrong password");
+  if(pw!==userData.pw) return alert("Wrong password");
+
   localStorage.session=u;
   location.reload();
 }
 
-function logout(){localStorage.removeItem("session");location.reload();}
+function logout(){
+  localStorage.removeItem("session");
+  location.reload();
+}
 
-/* ---------- DATA ---------- */
-const courses=[
-  {id:"html",name:"HTML",lessons:[
-    {id:"h1",title:"What is HTML?",content:"HTML is a markup language that defines structure of web pages."},
-    {id:"h2",title:"HTML Document Structure",content:"Every HTML page has <!DOCTYPE html>, <html>, <head>, and <body>."},
-    {id:"h3",title:"Headings",content:"Use <h1> to <h6> for headings."},
-    {id:"h4",title:"Paragraphs",content:"Use <p> for paragraphs."},
-    {id:"h5",title:"Text Formatting",content:"<b>, <i>, <strong>, <em>, <mark>."},
-    {id:"h6",title:"Links",content:"<a href='url'>Link</a>."},
-    {id:"h7",title:"Images",content:"<img src='url' alt='desc'>."},
-    {id:"h8",title:"Lists",content:"<ul>, <ol>, <li>."},
-    {id:"h9",title:"Tables",content:"<table>, <tr>, <td>, <th>."},
-    {id:"h10",title:"Forms",content:"<form> with inputs, labels, buttons."},
-    {id:"h11",title:"Input Types",content:"text, password, email, number, date, checkbox, radio."},
-    {id:"h12",title:"Buttons",content:"<button> and input type='submit'."},
-    {id:"h13",title:"Div vs Span",content:"div is block, span is inline."},
-    {id:"h14",title:"Semantic HTML",content:"<header>, <footer>, <section>, <article>."},
-    {id:"h15",title:"Meta Tags",content:"<meta charset='utf-8'>, viewport, description."},
-    {id:"h16",title:"Media",content:"<audio> and <video> tags."},
-    {id:"h17",title:"Iframes",content:"<iframe src='url'></iframe>."},
-    {id:"h18",title:"Forms Validation",content:"required, pattern, min, max, email type."},
-    {id:"h19",title:"Accessibility",content:"Use alt, labels, aria attributes."},
-    {id:"h20",title:"HTML Best Practices",content:"Use semantic tags, proper indentation, alt text."}
-  ], exam:[
-    {q:"HTML stands for?",o:["Hyper Text Markup Language","High Text Machine Language","Hyperlinks Text Mark Language"],a:0},
-    {q:"Which tag is for a link?",o:["<a>","<link>","<href>"],a:0},
-    {q:"Which tag is for an image?",o:["<img>","<image>","<pic>"],a:0},
-    {q:"Semantic tag example?",o:["<header>","<div>","<span>"],a:0}
-  ]},
+/* ---------- USER ---------- */
+let user,data;
+function loadUser(){
+  user=localStorage.session;
+  if(!user) return authScreen();
+  data=JSON.parse(localStorage[user]);
+  init();
+}
 
-  {id:"css",name:"CSS",lessons:[
-    {id:"c1",title:"What is CSS?",content:"CSS styles HTML and controls layout, color, fonts, spacing."},
-    {id:"c2",title:"CSS Syntax",content:"selector { property: value; }"},
-    {id:"c3",title:"Selectors",content:"Element, class, id selectors: h1, .class, #id."},
-    {id:"c4",title:"Colors",content:"Named colors, hex (#fff), rgb(), rgba()."},
-    {id:"c5",title:"Units",content:"px, em, rem, %, vw, vh."},
-    {id:"c6",title:"Box Model",content:"Content + padding + border + margin."},
-    {id:"c7",title:"Borders",content:"border-style, border-width, border-color."},
-    {id:"c8",title:"Margin",content:"Space outside element."},
-    {id:"c9",title:"Padding",content:"Space inside element."},
-    {id:"c10",title:"Fonts",content:"font-family, font-size, font-weight."},
-    {id:"c11",title:"Text Styling",content:"color, text-align, text-decoration."},
-    {id:"c12",title:"Display",content:"block, inline, inline-block."},
-    {id:"c13",title:"Position",content:"static, relative, absolute, fixed."},
-    {id:"c14",title:"Flexbox",content:"display:flex; align-items; justify-content."},
-    {id:"c15",title:"Grid",content:"display:grid; grid-template-columns."},
-    {id:"c16",title:"Responsive Design",content:"Use flexible layouts and media queries."},
-    {id:"c17",title:"Media Queries",content:"@media (max-width: 600px) { ... }"},
-    {id:"c18",title:"Transitions",content:"transition: property duration."},
-    {id:"c19",title:"Animations",content:"@keyframes + animation property."},
-    {id:"c20",title:"CSS Variables",content:"--main-color: #04aa6d; var(--main-color)."}
-  ], exam:[
-    {q:"CSS stands for?",o:["Cascading Style Sheets","Colorful Style Sheets","Computer Style Sheets"],a:0},
-    {q:"Select by class?",o:[".class","class=","#class"],a:0},
-    {q:"Flex container property?",o:["display:flex","display:block","display:grid"],a:0},
-    {q:"Media query syntax uses?",o:["@media","@query","@screen"],a:0}
-  ]},
-
-  {id:"js",name:"JavaScript",lessons:[
-    {id:"j1",title:"What is JavaScript?",content:"JS adds interactivity and logic to web pages."},
-    {id:"j2",title:"Variables",content:"let x = 5; const y = 10;"},
-    {id:"j3",title:"Data Types",content:"string, number, boolean, object, array, null, undefined."},
-    {id:"j4",title:"Operators",content:"+ - * / % ++ --."},
-    {id:"j5",title:"Conditions",content:"if, else, switch."},
-    {id:"j6",title:"Loops",content:"for, while, do..while."},
-    {id:"j7",title:"Functions",content:"function name(){ }"},
-    {id:"j8",title:"Scope",content:"global vs local scope."},
-    {id:"j9",title:"Events",content:"onclick, oninput, onsubmit."},
-    {id:"j10",title:"DOM Basics",content:"document.getElementById(), querySelector()."},
-    {id:"j11",title:"DOM Manipulation",content:"element.innerHTML, style, classList."},
-    {id:"j12",title:"Forms Validation",content:"check values, preventDefault."},
-    {id:"j13",title:"Arrays",content:"let arr=[1,2,3]; arr.push(4)."},
-    {id:"j14",title:"Objects",content:"let obj={name:'John', age:30};"},
-    {id:"j15",title:"JSON",content:"JSON.stringify() and JSON.parse()."},
-    {id:"j16",title:"Fetch API",content:"fetch(url).then(res=>res.json())."},
-    {id:"j17",title:"Async/Await",content:"async function(){ await fetch(); }"},
-    {id:"j18",title:"LocalStorage",content:"localStorage.setItem('k','v');"},
-    {id:"j19",title:"Error Handling",content:"try{ } catch(e){ }"},
-    {id:"j20",title:"JS Best Practices",content:"Use const, avoid globals, comment, keep functions small."}
-  ], exam:[
-    {q:"JS is used for?",o:["Interactivity","Styling","Markup"],a:0},
-    {q:"Declare variable with?",o:["let","css","html"],a:0},
-    {q:"DOM stands for?",o:["Document Object Model","Data Object Model","Document Output Model"],a:0},
-    {q:"Fetch returns?",o:["Promise","String","Array"],a:0}
-  ]}
+/* ---------- LESSONS ---------- */
+const lessons=[
+  {t:"HTML 1 - What is HTML?", c:"HTML stands for HyperText Markup Language. It defines the structure of web pages using tags.", e:"<h1>Hello</h1><p>This is HTML</p>"},
+  {t:"HTML 2 - Elements & Tags", c:"HTML elements consist of opening tag, content, and closing tag.", e:"<h1>Tag</h1><p>Content</p>"},
+  {t:"HTML 3 - Headings", c:"Headings range from <h1> to <h6>.", e:"<h1>H1</h1><h2>H2</h2>"},
+  {t:"HTML 4 - Paragraphs", c:"Paragraphs use <p> tags.", e:"<p>This is a paragraph.</p>"},
+  {t:"HTML 5 - Links", c:"Links use <a href='url'>text</a>.", e:"<a href='https://example.com'>Example</a>"},
+  {t:"HTML 6 - Images", c:"Images use <img src='url' alt='text'>", e:"<img src='https://via.placeholder.com/150' alt='img'>"},
+  {t:"HTML 7 - Lists", c:"Ordered <ol> and unordered <ul> lists.", e:"<ul><li>Item</li></ul>"},
+  {t:"HTML 8 - Tables", c:"Tables use <table>, <tr>, <td>, <th>.", e:"<table><tr><th>H</th></tr><tr><td>1</td></tr></table>"},
+  {t:"HTML 9 - Forms", c:"Forms collect user input.", e:"<form><input placeholder='name'></form>"},
+  {t:"HTML 10 - Semantic HTML", c:"Use <header>, <footer>, <nav>, <section> for structure.", e:"<header>Header</header><footer>Footer</footer>"},
+  {t:"HTML 11 - Media", c:"Embed video/audio with <video> and <audio>.", e:"<video controls src=''></video>"},
+  {t:"HTML 12 - Meta Tags", c:"Meta tags define page info like charset and viewport.", e:"<meta charset='UTF-8'><meta name='viewport' content='width=device-width'>"},
+  {t:"HTML 13 - Iframes", c:"Iframes embed other pages.", e:"<iframe src='https://example.com'></iframe>"},
+  {t:"HTML 14 - Accessibility", c:"Use alt, aria-label, semantic tags for accessibility.", e:"<img alt='desc'>"},
+  {t:"HTML 15 - Best Practices", c:"Use semantic HTML, validate your code, and keep it clean.", e:"<h1>Best</h1>"},
+  {t:"CSS 1 - What is CSS?", c:"CSS styles HTML elements.", e:"<style>p{color:red}</style><p>Red</p>"},
+  {t:"CSS 2 - Selectors", c:"Select elements using tags, classes, and IDs.", e:"<style>.x{color:blue}</style><p class='x'>Blue</p>"},
+  {t:"CSS 3 - Box Model", c:"Content + padding + border + margin.", e:"<style>div{padding:10px;border:1px solid}</style><div>Box</div>"},
+  {t:"CSS 4 - Flexbox", c:"Flexbox aligns items in a container.", e:"<style>.f{display:flex}</style><div class='f'><div>A</div><div>B</div></div>"},
+  {t:"CSS 5 - Grid", c:"Grid creates rows and columns.", e:"<style>.g{display:grid;grid-template-columns:1fr 1fr}</style><div class='g'><div>A</div><div>B</div></div>"},
+  {t:"CSS 6 - Responsive", c:"Use media queries for mobile layouts.", e:"<style>@media(max-width:500px){p{color:red}}</style><p>Resize</p>"},
+  {t:"CSS 7 - Colors", c:"Use hex, rgb, hsl.", e:"<style>p{color:#04aa6d}</style><p>Green</p>"},
+  {t:"CSS 8 - Typography", c:"Use font-family, size, weight.", e:"<style>p{font-size:24px}</style><p>Big</p>"},
+  {t:"CSS 9 - Animations", c:"Animate using keyframes.", e:"<style>@keyframes x{0%{opacity:0}100%{opacity:1}}p{animation:x 2s}</style><p>Fade</p>"},
+  {t:"CSS 10 - Variables", c:"Use CSS variables with --name.", e:"<style>:root{--g:#04aa6d}p{color:var(--g)}</style><p>Var</p>"},
+  {t:"CSS 11 - Borders", c:"Use border-style, width, color.", e:"<style>div{border:2px solid red}</style><div>Border</div>"},
+  {t:"CSS 12 - Shadows", c:"Use box-shadow and text-shadow.", e:"<style>p{text-shadow:2px 2px #000}</style><p>Shadow</p>"},
+  {t:"CSS 13 - Transitions", c:"Use transition for smooth effects.", e:"<style>p{transition:1s}p:hover{color:red}</style><p>Hover</p>"},
+  {t:"CSS 14 - Position", c:"Use static, relative, absolute, fixed.", e:"<style>div{position:relative}span{position:absolute;top:0}</style><div><span>Abs</span></div>"},
+  {t:"CSS 15 - Layouts", c:"Learn layout with flex/grid/float.", e:"<style>.f{display:flex}</style><div class='f'><div>A</div><div>B</div></div>"},
+  {t:"JS 1 - What is JS?", c:"JS makes web pages interactive.", e:"<script>alert('Hello')</script>"},
+  {t:"JS 2 - Variables", c:"Use let/const to store values.", e:"<script>let x=5;console.log(x)</script>"},
+  {t:"JS 3 - Data Types", c:"String, Number, Boolean, Object, Array.", e:"<script>console.log(typeof 5)</script>"},
+  {t:"JS 4 - Operators", c:"+ - * / %", e:"<script>console.log(5+5)</script>"},
+  {t:"JS 5 - Conditionals", c:"Use if/else for decisions.", e:"<script>if(true)alert('yes')</script>"},
+  {t:"JS 6 - Loops", c:"Use for/while to repeat.", e:"<script>for(let i=0;i<3;i++)console.log(i)</script>"},
+  {t:"JS 7 - Functions", c:"Reusable code blocks.", e:"<script>function add(a,b){return a+b}console.log(add(2,3))</script>"},
+  {t:"JS 8 - DOM", c:"Document Object Model controls HTML.", e:"<button onclick='document.getElementById(\"p\").textContent=\"Changed\"'>Click</button><p id='p'>Original</p>"},
+  {t:"JS 9 - Events", c:"React to clicks, input, etc.", e:"<button onclick='alert(\"Clicked\")'>Click</button>"},
+  {t:"JS 10 - Arrays", c:"Store lists of values.", e:"<script>let a=[1,2,3];console.log(a[0])</script>"},
+  {t:"JS 11 - Objects", c:"Key/value pairs.", e:"<script>let o={name:'x'};console.log(o.name)</script>"},
+  {t:"JS 12 - JSON", c:"Data format used in APIs.", e:"<script>let j=JSON.stringify({a:1});console.log(j)</script>"},
+  {t:"JS 13 - Fetch API", c:"Use fetch to call APIs.", e:"<script>fetch('https://jsonplaceholder.typicode.com/todos/1').then(r=>r.json()).then(console.log)</script>"},
+  {t:"JS 14 - Async/Await", c:"Use async for clean async code.", e:"<script>async function f(){let r=await fetch('https://jsonplaceholder.typicode.com/todos/1');console.log(await r.json())}f()</script>"},
+  {t:"JS 15 - Best Practices", c:"Write clean code, comment, use functions.", e:"<script>console.log('Best Practice')</script>"}
 ];
 
-/* ---------- STATE ---------- */
-let user, data;
-function loadUser(u){
-  user=u;
-  data=JSON.parse(localStorage[user]);
-  render();
-}
-
 /* ---------- NAV ---------- */
-function render(){
+function init(){
   const nav=document.getElementById("nav");
   nav.innerHTML="";
-  courses.forEach(c=>{
-    const h=document.createElement("h4"); h.textContent=c.name; nav.appendChild(h);
-    c.lessons.forEach((l,idx)=>{
-      const id=c.id+"_"+l.id;
-      const a=document.createElement("a");
-      a.textContent=l.title;
-      a.id=id;
-      const lock = !isUnlocked(c.id, idx);
-      if(lock) a.classList.add("locked");
-      a.onclick=()=>loadLesson(c.id, idx);
-      nav.appendChild(a);
-    });
-    const examLink=document.createElement("a");
-    examLink.textContent="🧪 "+c.name+" Exam";
-    examLink.onclick=()=>courseExam(c.id);
-    if(!isCourseUnlocked(c.id)) examLink.classList.add("locked");
-    nav.appendChild(examLink);
+  lessons.forEach((l,i)=>{
+    const a=document.createElement("a");
+    a.textContent=l.t;
+    if(i>data.done.length) a.classList.add("locked");
+    a.onclick=()=>loadLesson(i);
+    a.id="l"+i;
+    nav.appendChild(a);
   });
   nav.innerHTML += `
-    <h4>Platform</h4>
-    <a onclick="finalExam()">🏁 Final Exam</a>
+    <a onclick="exam()">🧪 Final Exam</a>
     <a onclick="certificate()">🎓 Certificate</a>
-    <a onclick="openLeaderboard()">🏆 Leaderboard</a>
-    <a onclick="openTeacher()" ${user === "webwoner" ? "" : "style='opacity:.5;pointer-events:none'"}>🧑‍🏫 Teacher Mode</a>
+    <a onclick="leaderboard()">🏆 Leaderboard</a>
+    <a onclick="adminPanel()">🛠 Admin</a>
   `;
-  loadLessonByProgress();
+  loadLesson(data.done.length||0);
 }
 
-/* ---------- PROGRESSION ---------- */
-function isUnlocked(courseId, lessonIndex){
-  const courseIndex=courses.findIndex(c=>c.id===courseId);
-  const globalIndex = courses.slice(0,courseIndex).reduce((sum,c)=>sum+c.lessons.length,0)+lessonIndex;
-  return data.done.includes(globalIndex) || globalIndex===data.done.length;
-}
-function isCourseUnlocked(courseId){
-  const courseIndex=courses.findIndex(c=>c.id===courseId);
-  const prevLessons = courses.slice(0,courseIndex).reduce((sum,c)=>sum+c.lessons.length,0);
-  return data.done.length>=prevLessons;
-}
-function loadLessonByProgress(){
-  const idx=data.done.length;
-  const courseIndex=findCourseByGlobal(idx);
-  if(courseIndex>=0){
-    const course=courses[courseIndex.course];
-    loadLesson(course.id, course.lesson);
-  }
-}
-function findCourseByGlobal(globalIdx){
-  let sum=0;
-  for(let i=0;i<courses.length;i++){
-    if(globalIdx < sum + courses[i].lessons.length){
-      return {course:i, lesson:globalIdx - sum};
-    }
-    sum += courses[i].lessons.length;
-  }
-  return null;
-}
-
-/* ---------- LESSON UI ---------- */
-function loadLesson(courseId, idx){
-  const course=courses.find(c=>c.id===courseId);
-  if(!course) return;
-  const lesson=course.lessons[idx];
-  if(!isUnlocked(courseId, idx)) return alert("Locked");
-
+/* ---------- LOAD ---------- */
+function loadLesson(i){
+  if(i>data.done.length) return;
   document.querySelectorAll("nav a").forEach(a=>a.classList.remove("active"));
-  document.getElementById(courseId+"_"+lesson.id)?.classList.add("active");
+  document.getElementById("l"+i).classList.add("active");
 
+  const l=lessons[i];
   document.getElementById("main").innerHTML=`
-    <div class="box">
-      <strong>Progress:</strong> ${Math.round(data.done.length/totalLessons()*100)}%
-      <br><small>Complete lessons to unlock next.</small>
-    </div>
-    <h1>${lesson.title}</h1>
-    <p>${lesson.content}</p>
+    <div class="box">Progress: ${Math.round(data.done.length/lessons.length*100)}%</div>
+    <h1>${l.t}</h1>
+    <p>${l.c}</p>
 
     <div class="editor">
-      <textarea>${lessonExample(courseId, lesson.id)}</textarea>
+      <textarea>${l.e}</textarea>
       <button class="btn" onclick="run(this)">Run</button>
       <iframe></iframe>
     </div>
 
-    <button class="btn" onclick="completeLesson('${courseId}','${lesson.id}')">✔ Complete</button>
+    <button class="btn" onclick="complete(${i})">✔ Complete Lesson</button>
 
     <div class="box">
-      <button class="btn" onclick="aiExplain('${lesson.title}')">🤖 AI Explain</button>
-      <button class="btn" onclick="aiQuiz('${lesson.title}')">🧠 Generate Quiz</button>
+      <button class="btn" onclick="aiHelp('${l.t}')">🤖 AI Tutor</button>
       <div id="aiout"></div>
     </div>
   `;
 }
 
-function lessonExample(courseId, lessonId){
-  if(courseId==="html"){
-    return `<h1>${lessonId}</h1>\n<p>Example content.</p>`;
-  }
-  if(courseId==="css"){
-    return `<style>h1{color:var(--g)}</style>\n<h1>${lessonId}</h1>`;
-  }
-  return `<button onclick="alert('Hello')">Click</button>`;
-}
-
-function completeLesson(courseId, lessonId){
-  const globalIndex = getGlobalIndex(courseId, lessonId);
-  if(!data.done.includes(globalIndex)) data.done.push(globalIndex);
-  save();
-  render();
-}
-
-/* ---------- EXAMS ---------- */
-function courseExam(courseId){
-  const course=courses.find(c=>c.id===courseId);
-  if(!isCourseUnlocked(courseId)) return alert("Finish previous courses first");
-  const passed = data.scores[courseId];
-  if(passed) return alert("Exam already passed");
-
-  const q=course.exam;
-  quizScreen(course.name+" Exam", q, (score)=>{
-    if(score>=75){
-      data.scores[courseId]=true;
-      save();
-      alert("Passed "+course.name+" exam!");
-      render();
-    } else alert("Fail. Score: "+score+"%. Need 75%");
-  });
-}
-
-function finalExam(){
-  if(!allCoursePassed()) return alert("Pass all course exams first");
-  if(data.exam) return alert("Final exam already passed");
-
-  const questions=[
-    {q:"HTML stands for?",o:["Hyper Text Markup Language","High Text Machine Language","Hyperlinks Text Mark Language"],a:0},
-    {q:"CSS is used for?",o:["Styling","Logic","Data"],a:0},
-    {q:"JS is used for?",o:["Interactivity","Markup","Styling"],a:0},
-    {q:"Use <a> for?",o:["Links","Images","Tables"],a:0},
-    {q:"Use flexbox for?",o:["Layout","Text only","Audio"],a:0}
-  ];
-
-  quizScreen("Final Exam", questions, (score)=>{
-    if(score>=80){
-      data.exam=true;
-      save();
-      alert("Final exam passed!");
-    } else alert("Final exam failed: "+score+"%");
-  });
-}
-
-function allCoursePassed(){
-  return courses.every(c=>data.scores[c.id]);
-}
-
-function quizScreen(title, questions, callback){
-  const html = `
-    <h1>${title}</h1>
-    ${questions.map((q,i)=>`
-      <div class="box">
-        <strong>${i+1}. ${q.q}</strong>
-        ${q.o.map((opt,j)=>`
-          <label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>
-        `).join("")}
-      </div>
-    `).join("")}
-    <button class="btn" onclick="submitQuiz(${questions.length})">Submit</button>
-  `;
-  document.getElementById("main").innerHTML=html;
-
-  window.submitQuiz = (n)=>{
-    let correct=0;
-    for(let i=0;i<n;i++){
-      const sel=document.querySelector(`input[name="q${i}"]:checked`);
-      if(sel && parseInt(sel.value)===questions[i].a) correct++;
-    }
-    const score=Math.round(correct/n*100);
-    callback(score);
-  };
-}
-
-/* ---------- AI ---------- */
-async function aiExplain(text){
-  document.getElementById("aiout").textContent="Thinking...";
-  const r=await ai(`Explain ${text} for beginners`,{max_new_tokens:90});
-  document.getElementById("aiout").textContent=r[0].generated_text;
-}
-async function aiQuiz(text){
-  document.getElementById("aiout").textContent="Generating quiz...";
-  const r=await ai(`Generate 1 multiple choice question about ${text}`,{max_new_tokens:80});
-  document.getElementById("aiout").textContent=r[0].generated_text;
-}
-
-/* ---------- SANDBOX ---------- */
 function run(btn){
   btn.nextElementSibling.srcdoc=btn.previousElementSibling.value;
 }
 
-/* ---------- LEADERBOARD ---------- */
-function openLeaderboard(){
-  let html="<h1>Leaderboard</h1>";
-  const users=Object.keys(localStorage).filter(k=>k!=="session");
-  const list=users.map(u=>{
-    try{
-      const d=JSON.parse(localStorage[u]);
-      if(!d.done) return null;
-      const pct=Math.round(d.done.length/totalLessons()*100);
-      return {u,pct};
-    }catch{return null}
-  }).filter(Boolean).sort((a,b)=>b.pct-a.pct);
+function complete(i){
+  if(!data.done.includes(i)){
+    data.done.push(i);
+    save();
+    location.reload();
+  }
+}
 
-  html += list.map(x=>`<p>${x.u}: ${x.pct}%</p>`).join("");
-  document.getElementById("main").innerHTML=html;
+/* ---------- AI ---------- */
+async function aiHelp(topic){
+  document.getElementById("aiout").textContent="Thinking...";
+  const res=await ai("Explain "+topic+" in simple terms and give an example",{max_new_tokens:100});
+  document.getElementById("aiout").textContent=res[0].generated_text;
+}
+
+/* ---------- EXAM ---------- */
+const examQuestions=[
+  {q:"HTML stands for?", a:"HyperText Markup Language"},
+  {q:"CSS is used for?", a:"Styling"},
+  {q:"JS is used for?", a:"Interactivity"},
+  {q:"What tag is used for a link?", a:"a"},
+  {q:"What property sets color in CSS?", a:"color"}
+];
+
+function exam(){
+  if(data.done.length<lessons.length) return alert("Finish all lessons first");
+  let score=0;
+  for(const q of examQuestions){
+    const ans=prompt(q.q);
+    if(ans && ans.toLowerCase().includes(q.a.toLowerCase())) score++;
+  }
+  const pass=score>=4;
+  if(pass){
+    data.exam=true; save();
+    alert("Passed exam ✔");
+  } else alert("Failed exam ❌");
 }
 
 /* ---------- CERTIFICATE ---------- */
 function certificate(){
-  if(!data.exam) return alert("Complete all lessons + final exam first");
+  if(!data.exam || data.done.length<lessons.length){
+    return alert("Complete all lessons and pass exam first");
+  }
   const c=document.createElement("canvas");
   c.width=800; c.height=400;
-  const x=c.getContext("2d");
-  x.fillStyle="#fff"; x.fillRect(0,0,800,400);
-  x.fillStyle="#000"; x.font="36px serif";
-  x.fillText("Certificate of Completion",150,150);
-  x.font="22px serif";
-  x.fillText(user,350,230);
-  x.fillText(new Date().toDateString(),300,290);
+  const ctx=c.getContext("2d");
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,800,400);
+  ctx.fillStyle="#000"; ctx.font="36px serif";
+  ctx.fillText("Certificate of Completion",120,150);
+  ctx.font="24px serif"; ctx.fillText(user,340,230);
   const a=document.createElement("a");
   a.href=c.toDataURL(); a.download="certificate.png"; a.click();
 }
 
-/* ---------- TEACHER MODE ---------- */
-function openTeacher(){
-  if(user !== "webwoner") return alert("Access denied");
-  const html = `
-    <h1>Teacher / Admin Mode</h1>
-    <div class="box">
-      <h3>Add Lesson</h3>
-      <select id="tc"></select>
-      <input id="tt" placeholder="Lesson title">
-      <textarea id="tcnt" placeholder="Lesson content"></textarea>
-      <button class="btn" onclick="addLesson()">Add Lesson</button>
-    </div>
-
-    <div class="box">
-      <h3>Add Exam Question</h3>
-      <select id="qc"></select>
-      <input id="qq" placeholder="Question">
-      <input id="qo1" placeholder="Option 1">
-      <input id="qo2" placeholder="Option 2">
-      <input id="qo3" placeholder="Option 3">
-      <input id="qa" placeholder="Correct option (0/1/2)">
-      <button class="btn" onclick="addQuestion()">Add Question</button>
-    </div>
-
-    <div class="box">
-      <h3>User Management</h3>
-      <input id="newUser" placeholder="New username">
-      <input id="newPass" type="password" placeholder="Password">
-      <button class="btn" onclick="createUser()">Create User</button>
-      <br><br>
-      <button class="btn" onclick="resetAll()">Reset All Data</button>
-    </div>
-  `;
-  document.getElementById("main").innerHTML=html;
-  populateTeacher();
-}
-
-function populateTeacher(){
-  const tc=document.getElementById("tc");
-  const qc=document.getElementById("qc");
-  tc.innerHTML="";
-  qc.innerHTML="";
-  courses.forEach(c=>{
-    const opt=document.createElement("option"); opt.value=c.id; opt.textContent=c.name;
-    tc.appendChild(opt);
-    qc.appendChild(opt.cloneNode(true));
-  });
-}
-
-function addLesson(){
-  const courseId=document.getElementById("tc").value;
-  const title=document.getElementById("tt").value;
-  const content=document.getElementById("tcnt").value;
-  if(!title||!content) return alert("Fill title + content");
-  const course=courses.find(c=>c.id===courseId);
-  course.lessons.push({id:"l"+(course.lessons.length+1),title,content});
-  saveCourses();
-  render();
-  alert("Lesson added");
-}
-
-function addQuestion(){
-  const courseId=document.getElementById("qc").value;
-  const q=document.getElementById("qq").value;
-  const o1=document.getElementById("qo1").value;
-  const o2=document.getElementById("qo2").value;
-  const o3=document.getElementById("qo3").value;
-  const a=parseInt(document.getElementById("qa").value);
-  if(!q||!o1||!o2||!o3||isNaN(a)) return alert("Fill all");
-  const course=courses.find(c=>c.id===courseId);
-  course.exam.push({q,o:[o1,o2,o3],a});
-  saveCourses();
-  alert("Question added");
-}
-
-async function createUser(){
-  const u=document.getElementById("newUser").value.trim();
-  const p=document.getElementById("newPass").value;
-  if(!u||!p) return alert("Fill");
-  if(localStorage[u]) return alert("User exists");
-  const pw=await hash(p);
-  localStorage[u]=JSON.stringify({pw,done:[],scores:{},exam:false,admin:false});
-  alert("User created");
-}
-
-function resetAll(){
-  if(!confirm("Reset all users and progress?")) return;
-  Object.keys(localStorage).forEach(k=>localStorage.removeItem(k));
-  location.reload();
-}
-
-/* ---------- SAVE / LOAD ---------- */
-function save(){ localStorage[user]=JSON.stringify(data) }
-function saveCourses(){ localStorage.courses=JSON.stringify(courses) }
-function loadCourses(){
-  const stored=localStorage.courses;
-  if(stored){
+/* ---------- LEADERBOARD ---------- */
+function leaderboard(){
+  let html="<h1>Leaderboard</h1>";
+  let arr=[];
+  for(let k in localStorage){
+    if(k==="session") continue;
     try{
-      const parsed=JSON.parse(stored);
-      if(Array.isArray(parsed)) courses.splice(0,courses.length,...parsed);
-    } catch{}
+      const d=JSON.parse(localStorage[k]);
+      if(d.done) arr.push({k,score:d.done.length});
+    }catch{}
   }
-}
-loadCourses();
-
-/* ---------- UTILS ---------- */
-function totalLessons(){ return courses.reduce((sum,c)=>sum+c.lessons.length,0); }
-function getGlobalIndex(courseId, lessonId){
-  let sum=0;
-  for(const c of courses){
-    if(c.id===courseId){
-      const idx=c.lessons.findIndex(l=>l.id===lessonId);
-      return sum + idx;
-    }
-    sum += c.lessons.length;
-  }
-  return -1;
+  arr.sort((a,b)=>b.score-a.score);
+  html += arr.map(x=>`<p>${x.k}: ${x.score}/${lessons.length}</p>`).join("");
+  document.getElementById("main").innerHTML=html;
 }
 
-/* ---------- VOICE ---------- */
+/* ---------- ADMIN PANEL ---------- */
+async function adminPanel(){
+  if(!data.admin) return alert("Access denied");
+  const name=prompt("Admin: Enter secret passphrase");
+  if(name!=="adminSecret") return alert("Wrong");
+  const newLesson=prompt("Add lesson title");
+  const newContent=prompt("Add lesson content");
+  const newExample=prompt("Add lesson example");
+  lessons.push({t:newLesson,c:newContent,e:newExample});
+  alert("Lesson added!");
+  init();
+}
+
+/* ---------- UTIL ---------- */
+function save(){localStorage[user]=JSON.stringify(data)}
+function toggleDark(){document.body.classList.toggle("dark")}
 function voice(){
-  const r=new webkitSpeechRecognition();
-  r.onresult=e=>aiExplain(e.results[0][0].transcript);
+  const r=new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  r.onresult=e=>aiHelp(e.results[0][0].transcript);
   r.start();
 }
 
-/* ---------- DARK ---------- */
-function toggleDark(){document.body.classList.toggle("dark")}
-
 /* ---------- START ---------- */
-if(localStorage.session) loadUser(localStorage.session);
+loadUser();
 </script>
 </body>
 </html>
